@@ -55,7 +55,6 @@
 </head>
 <body class="p-4 max-w-lg mx-auto pb-20">
 
-  <!-- Шапка генератора -->
   <div class="flex items-center gap-3 mb-5 pt-2">
     <div class="w-10 h-10 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center text-white font-title font-extrabold text-lg">
       🏎️
@@ -67,13 +66,11 @@
   </div>
 
   <div class="glass-card rounded-3xl p-5 space-y-4">
-    <!-- Название студии -->
     <div>
       <label class="block text-zinc-400 text-[11px] font-bold uppercase mb-1">Название студии / сервиса</label>
       <input id="name" oninput="autoSlug()" placeholder="Например: Саня Детейлинг" class="field">
     </div>
 
-    <!-- Slug (Идентификатор БД) и PIN -->
     <div class="grid grid-cols-2 gap-2.5">
       <div>
         <label class="block text-zinc-400 text-[10px] font-bold uppercase mb-1">ID базы (slug в URL)</label>
@@ -85,13 +82,11 @@
       </div>
     </div>
 
-    <!-- Категория -->
     <div>
       <label class="block text-zinc-400 text-[11px] font-bold uppercase mb-1">Категория / Подзаголовок</label>
       <input id="cat" value="Центр ухода & защиты кузова" class="field">
     </div>
 
-    <!-- Адрес и Телефон -->
     <div class="grid grid-cols-2 gap-2.5">
       <div>
         <label class="block text-zinc-400 text-[11px] font-bold uppercase mb-1">Адрес бокса</label>
@@ -103,7 +98,6 @@
       </div>
     </div>
 
-    <!-- Услуги и цены -->
     <div class="pt-3 border-t border-white/5 space-y-2.5">
       <div class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">3 ключевые услуги из 2ГИС / Карт:</div>
 
@@ -140,10 +134,7 @@
     </button>
   </div>
 
-  <!-- Результаты генерации -->
   <div id="result" class="mt-5 hidden space-y-3.5">
-    
-    <!-- Витрина -->
     <div class="glass-card rounded-2xl p-4 space-y-2">
       <div class="flex justify-between items-center text-xs">
         <span class="text-zinc-400 font-bold uppercase text-[10px]">1. Ссылка витрины (index.html):</span>
@@ -155,7 +146,6 @@
       <div id="clientLinkText" class="text-[11px] text-zinc-300 break-all p-2.5 rounded-xl bg-black/50 border border-white/5 font-mono select-all"></div>
     </div>
 
-    <!-- Админка -->
     <div class="glass-card rounded-2xl p-4 space-y-2">
       <div class="flex justify-between items-center text-xs">
         <span class="text-zinc-400 font-bold uppercase text-[10px]">2. Ссылка админки (admin.html):</span>
@@ -167,7 +157,6 @@
       <div id="adminLinkText" class="text-[11px] text-zinc-300 break-all p-2.5 rounded-xl bg-black/50 border border-white/5 font-mono select-all"></div>
     </div>
 
-    <!-- Питч для отправки -->
     <div class="glass-card rounded-2xl p-4 space-y-2">
       <div class="flex justify-between items-center text-xs">
         <span class="text-zinc-400 font-bold uppercase text-[10px]">Готовый питч для WhatsApp / Telegram:</span>
@@ -184,11 +173,9 @@
         </button>
       </div>
     </div>
-
   </div>
 
   <script>
-    // Транслитерация названия для автогенерации слага
     function autoSlug() {
       const val = document.getElementById('name').value.trim();
       const ruToEn = {
@@ -201,7 +188,10 @@
     }
 
     function generate() {
-      const base = window.location.origin + window.location.pathname.replace('create.html', '');
+      // Надежный расчет базовой папки без мусора параметров
+      const urlObj = new URL(window.location.href);
+      const pathname = urlObj.pathname.substring(0, urlObj.pathname.lastIndexOf('/') + 1);
+      const base = urlObj.origin + pathname;
 
       const nameVal = document.getElementById('name').value.trim() || 'Детейлинг Студия';
       const slugVal = document.getElementById('slug').value.trim() || 'studio';
@@ -240,7 +230,6 @@
       document.getElementById('clientTestLink').href = clientUrl;
       document.getElementById('adminTestLink').href = adminUrl;
 
-      // Текст питча для холодной рассылки
       document.getElementById('pitchText').value = 
 `Здравствуйте! Нашел вашу студию «${nameVal}» на картах.
 Заметил, что клиентам часто неудобно записываться на мойку и полировку без звонка (особенно когда мастера заняты в боксах и не могут взять трубку).
@@ -290,6 +279,15 @@
         return;
       }
       window.open(`https://t.me/+${rawPhone}`, '_blank');
+    }
+
+    // Регистрация Service Worker для офлайн-доступа генератора
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js', { scope: './' })
+          .then((reg) => console.log('SW зарегистрирован в генераторе:', reg.scope))
+          .catch((err) => console.warn('Ошибка SW:', err));
+      });
     }
   </script>
 </body>
