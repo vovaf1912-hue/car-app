@@ -24,7 +24,7 @@
   }
   .field{
     width:100%;
-    background:rgba(0,0,0,0.45);
+    background:rgba(0,0,0,0.5);
     border:1px solid rgba(255,255,255,0.1);
     border-radius:12px;
     padding:10px 14px;
@@ -53,7 +53,7 @@
   .btn-action:active{transform:scale(0.98)}
 </style>
 </head>
-<body class="p-4 max-w-lg mx-auto pb-20">
+<body class="p-4 max-w-lg mx-auto pb-24">
 
   <div class="flex items-center gap-3 mb-5 pt-2">
     <div class="w-10 h-10 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center text-white font-title font-extrabold text-lg">
@@ -66,15 +66,17 @@
   </div>
 
   <div class="glass-card rounded-3xl p-5 space-y-4">
+    <!-- Название студии -->
     <div>
       <label class="block text-zinc-400 text-[11px] font-bold uppercase mb-1">Название студии / сервиса</label>
-      <input id="name" oninput="autoSlug()" placeholder="Например: Саня Детейлинг" class="field">
+      <input id="name" oninput="autoSlug()" placeholder="Например: Om Detailing" class="field">
     </div>
 
+    <!-- Slug и PIN -->
     <div class="grid grid-cols-2 gap-2.5">
       <div>
         <label class="block text-zinc-400 text-[10px] font-bold uppercase mb-1">ID базы (slug в URL)</label>
-        <input id="slug" placeholder="sanya_detailing" class="field text-xs font-mono text-orange-400">
+        <input id="slug" placeholder="om_detailing" class="field text-xs font-mono text-orange-400">
       </div>
       <div>
         <label class="block text-zinc-400 text-[10px] font-bold uppercase mb-1">PIN для админки</label>
@@ -82,49 +84,64 @@
       </div>
     </div>
 
+    <!-- Категория -->
     <div>
       <label class="block text-zinc-400 text-[11px] font-bold uppercase mb-1">Категория / Подзаголовок</label>
       <input id="cat" value="Центр ухода & защиты кузова" class="field">
     </div>
 
+    <!-- Адрес и Телефон -->
     <div class="grid grid-cols-2 gap-2.5">
       <div>
         <label class="block text-zinc-400 text-[11px] font-bold uppercase mb-1">Адрес бокса</label>
-        <input id="addr" placeholder="ул. Ленина, 45, бокс 2" class="field">
+        <input id="addr" placeholder="г. Брянск, ул. Флотская 141А" class="field">
       </div>
       <div>
         <label class="block text-zinc-400 text-[11px] font-bold uppercase mb-1">Телефон владельца</label>
-        <input id="phone" placeholder="+7 (999) 000-00-00" class="field">
+        <input id="phone" placeholder="+79107430064" class="field">
       </div>
     </div>
 
-    <div class="pt-3 border-t border-white/5 space-y-2.5">
-      <div class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">3 ключевые услуги из 2ГИС / Карт:</div>
+    <!-- Услуги, цены и ссылки на фото -->
+    <div class="pt-3 border-t border-white/5 space-y-3">
+      <div class="flex justify-between items-center">
+        <div class="text-[11px] font-bold text-zinc-300 uppercase tracking-wider">3 ключевые услуги из 2ГИС / Карт:</div>
+        <span class="text-[10px] text-zinc-500">Остальное пойдет допами</span>
+      </div>
 
-      <div class="grid grid-cols-3 gap-2">
-        <div class="col-span-2">
-          <input id="s1_name" value="Трехфазная детейлинг-мойка" placeholder="Услуга 1" class="field">
+      <!-- Услуга 1 -->
+      <div class="p-3.5 rounded-2xl border border-white/5 bg-black/30 space-y-2">
+        <div class="grid grid-cols-3 gap-2">
+          <input id="s1_name" value="Комплекс «Фирменный»" placeholder="Услуга 1" class="field col-span-2 text-xs">
+          <input id="s1_price" type="number" step="50" value="2550" class="field text-right font-bold text-xs">
         </div>
         <div>
-          <input id="s1_price" type="number" step="100" value="2500" class="field text-right font-bold">
+          <label class="block text-[10px] font-bold text-zinc-500 uppercase mb-0.5">Ссылка на фото работы (из соцсетей/карт):</label>
+          <input id="s1_photo" placeholder="https://images.unsplash.com/photo-..." class="field text-[11px] py-1.5 font-mono text-zinc-300">
         </div>
       </div>
 
-      <div class="grid grid-cols-3 gap-2">
-        <div class="col-span-2">
-          <input id="s2_name" value="Мягкая полировка кузова" placeholder="Услуга 2" class="field">
+      <!-- Услуга 2 -->
+      <div class="p-3.5 rounded-2xl border border-white/5 bg-black/30 space-y-2">
+        <div class="grid grid-cols-3 gap-2">
+          <input id="s2_name" value="Комплекс «Premium»" placeholder="Услуга 2" class="field col-span-2 text-xs">
+          <input id="s2_price" type="number" step="50" value="5100" class="field text-right font-bold text-xs">
         </div>
         <div>
-          <input id="s2_price" type="number" step="500" value="12000" class="field text-right font-bold">
+          <label class="block text-[10px] font-bold text-zinc-500 uppercase mb-0.5">Ссылка на фото работы:</label>
+          <input id="s2_photo" placeholder="https://images.unsplash.com/photo-..." class="field text-[11px] py-1.5 font-mono text-zinc-300">
         </div>
       </div>
 
-      <div class="grid grid-cols-3 gap-2">
-        <div class="col-span-2">
-          <input id="s3_name" value="Комплексная химчистка салона" placeholder="Услуга 3" class="field">
+      <!-- Услуга 3 -->
+      <div class="p-3.5 rounded-2xl border border-white/5 bg-black/30 space-y-2">
+        <div class="grid grid-cols-3 gap-2">
+          <input id="s3_name" value="Комплекс «Clean Car»" placeholder="Услуга 3" class="field col-span-2 text-xs">
+          <input id="s3_price" type="number" step="50" value="9100" class="field text-right font-bold text-xs">
         </div>
         <div>
-          <input id="s3_price" type="number" step="500" value="8500" class="field text-right font-bold">
+          <label class="block text-[10px] font-bold text-zinc-500 uppercase mb-0.5">Ссылка на фото работы:</label>
+          <input id="s3_photo" placeholder="https://images.unsplash.com/photo-..." class="field text-[11px] py-1.5 font-mono text-zinc-300">
         </div>
       </div>
     </div>
@@ -134,7 +151,9 @@
     </button>
   </div>
 
+  <!-- Результаты генерации -->
   <div id="result" class="mt-5 hidden space-y-3.5">
+    <!-- Витрина -->
     <div class="glass-card rounded-2xl p-4 space-y-2">
       <div class="flex justify-between items-center text-xs">
         <span class="text-zinc-400 font-bold uppercase text-[10px]">1. Ссылка витрины (index.html):</span>
@@ -146,6 +165,7 @@
       <div id="clientLinkText" class="text-[11px] text-zinc-300 break-all p-2.5 rounded-xl bg-black/50 border border-white/5 font-mono select-all"></div>
     </div>
 
+    <!-- Админка -->
     <div class="glass-card rounded-2xl p-4 space-y-2">
       <div class="flex justify-between items-center text-xs">
         <span class="text-zinc-400 font-bold uppercase text-[10px]">2. Ссылка админки (admin.html):</span>
@@ -157,6 +177,7 @@
       <div id="adminLinkText" class="text-[11px] text-zinc-300 break-all p-2.5 rounded-xl bg-black/50 border border-white/5 font-mono select-all"></div>
     </div>
 
+    <!-- Питч -->
     <div class="glass-card rounded-2xl p-4 space-y-2">
       <div class="flex justify-between items-center text-xs">
         <span class="text-zinc-400 font-bold uppercase text-[10px]">Готовый питч для WhatsApp / Telegram:</span>
@@ -188,7 +209,6 @@
     }
 
     function generate() {
-      // Надежный расчет базовой папки без мусора параметров
       const urlObj = new URL(window.location.href);
       const pathname = urlObj.pathname.substring(0, urlObj.pathname.lastIndexOf('/') + 1);
       const base = urlObj.origin + pathname;
@@ -202,10 +222,15 @@
 
       const s1_n = document.getElementById('s1_name').value.trim() || 'Трехфазная детейлинг-мойка';
       const s1_p = document.getElementById('s1_price').value.trim() || '2500';
+      const s1_ph = document.getElementById('s1_photo').value.trim();
+
       const s2_n = document.getElementById('s2_name').value.trim() || 'Мягкая полировка кузова';
       const s2_p = document.getElementById('s2_price').value.trim() || '12000';
+      const s2_ph = document.getElementById('s2_photo').value.trim();
+
       const s3_n = document.getElementById('s3_name').value.trim() || 'Комплексная химчистка салона';
       const s3_p = document.getElementById('s3_price').value.trim() || '8500';
+      const s3_ph = document.getElementById('s3_photo').value.trim();
 
       const params = new URLSearchParams({
         slug: slugVal,
@@ -221,6 +246,10 @@
         s3_name: s3_n,
         s3_price: s3_p
       });
+
+      if (s1_ph) params.set('s1_photo', s1_ph);
+      if (s2_ph) params.set('s2_photo', s2_ph);
+      if (s3_ph) params.set('s3_photo', s3_ph);
 
       const clientUrl = base + 'index.html?' + params.toString();
       const adminUrl = base + 'admin.html?' + params.toString();
@@ -281,7 +310,6 @@
       window.open(`https://t.me/+${rawPhone}`, '_blank');
     }
 
-    // Регистрация Service Worker для офлайн-доступа генератора
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js', { scope: './' })
