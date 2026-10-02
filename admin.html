@@ -4,13 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#080a0d" id="meta-theme">
-
-<!-- Мета-теги для PWA и нативного режима iOS/Android -->
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CRM Детейлинг">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%23080a0d'/><text x='50%25' y='60%25' dominant-baseline='middle' text-anchor='middle' font-size='100'>⚙️</text></svg>">
 <link rel="manifest" href="./manifest.json">
 
 <title id="admin-title">CRM Панель управления</title>
@@ -24,29 +21,29 @@
   :root {
     --bg-page: #e2e5ea;
     --bg-app: #ffffff;
-    --card-surface: rgba(245, 247, 250, 0.95);
-    --border-color: rgba(226, 232, 240, 0.9);
+    --card-surface: #f4f5f8;
+    --border-color: #d1d5db;
     --text-primary: #09090b;
     --text-secondary: #64748b;
     --btn-bg: #09090b;
     --btn-text: #ffffff;
     --item-selected-bg: #09090b;
     --item-selected-text: #ffffff;
-    --float-bar-bg: rgba(255, 255, 255, 0.92);
+    --float-bar-bg: rgba(255, 255, 255, 0.95);
   }
 
   html[data-theme="dark"] {
     --bg-page: #000000;
     --bg-app: #080a0d;
-    --card-surface: rgba(15, 18, 24, 0.85);
-    --border-color: rgba(255, 255, 255, 0.08);
+    --card-surface: #13171f;
+    --border-color: #262c36;
     --text-primary: #f8fafc;
-    --text-secondary: #8492a6;
-    --btn-bg: #ffffff;
+    --text-secondary: #94a3b8;
+    --btn-bg: #f8fafc;
     --btn-text: #080a0d;
-    --item-selected-bg: #ffffff;
+    --item-selected-bg: #f8fafc;
     --item-selected-text: #080a0d;
-    --float-bar-bg: rgba(8, 10, 13, 0.92);
+    --float-bar-bg: rgba(8, 10, 13, 0.95);
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -80,9 +77,7 @@
     border: 1px solid var(--border-color);
     background: var(--card-surface);
     color: var(--text-primary);
-    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .select-box:active { transform: scale(0.98); }
   .select-box.is-selected {
     background: var(--item-selected-bg) !important;
     color: var(--item-selected-text) !important;
@@ -104,27 +99,26 @@
     align-items: center;
     justify-content: center;
     border: none;
-    transition: transform 0.12s ease;
+    cursor: pointer;
   }
   .btn-action:active { transform: scale(0.98); }
 
   .field-input {
     width: 100%;
-    background: transparent;
+    background: var(--card-surface);
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    padding: 10px 14px;
+    padding: 12px 14px;
     font-size: 13px;
     font-weight: 600;
     color: var(--text-primary);
     outline: none;
-    transition: border-color 0.15s ease;
   }
-  .field-input:focus { border-color: var(--text-primary); }
+  .field-input:focus { border-color: #3b82f6; }
 
   .pin-input {
     letter-spacing: 0.4em;
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 800;
     text-align: center;
     border-radius: 16px;
@@ -158,9 +152,6 @@
   .status-new { color: #f97316; background: rgba(249, 115, 22, 0.15); border: 1px solid rgba(249, 115, 22, 0.3); }
   .status-confirmed { color: #10b981; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); }
   .status-cancelled { color: #ef4444; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); }
-
-  .fade-in { animation: fadeIn 0.15s ease-out forwards; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 </style>
 </head>
 <body>
@@ -176,8 +167,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const slug = urlParams.get('slug') || urlParams.get('name') || "apex";
 const storageKey = key => `${slug}_${key}`;
 
-// Чтение комплексов и ссылок на фото из URL-параметров генератора
-function getInitialServicesFromUrl() {
+function getServicesFromUrl() {
   const list = [];
   for (let i = 1; i <= 6; i++) {
     const name = urlParams.get(`s${i}_name`);
@@ -202,32 +192,20 @@ const DEFAULTS = {
   address: urlParams.get('addr') || "ул. Промышленная, 18, бокс 4",
   phone: urlParams.get('phone') || "+7 (999) 000-00-00",
   pin: urlParams.get('pin') || "1234",
-  services: getInitialServicesFromUrl() || [
+  services: [
     {
-      id: "srv_01",
-      code: "№ 01",
-      name: "Трехфазная детейлинг-мойка",
-      price: 2500,
-      duration: "1.5 ч",
-      desc: "Бережная очистка кузова пористой губкой, удаление битумных точек и пыли тормозных колодок, сушка турбовоздухом.",
+      id: "srv_01", code: "№ 01", name: "Трехфазная детейлинг-мойка", price: 2500, duration: "1.5 ч",
+      desc: "Бережная очистка кузова пористой губкой, удаление битумных точек и пыли тормозных колодок.",
       photo: "https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&w=900&q=85"
     },
     {
-      id: "srv_02",
-      code: "№ 02",
-      name: "Мягкая восстановительная полировка",
-      price: 12000,
-      duration: "8 ч",
-      desc: "Устранение паутины, мелких царапин и матовости. Возвращение глубокого зеркального глянца и насыщенности цвета ЛКП.",
+      id: "srv_02", code: "№ 02", name: "Мягкая восстановительная полировка", price: 12000, duration: "8 ч",
+      desc: "Устранение паутины, мелких царапин и матовости. Возвращение глубокого зеркального глянца.",
       photo: "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=900&q=85"
     },
     {
-      id: "srv_03",
-      code: "№ 03",
-      name: "Комплексная химчистка салона",
-      price: 8500,
-      duration: "6 ч",
-      desc: "Глубокая экстракторная чистка ковролина и кресел с антибактериальной обработкой, деликатная консервация кожи и озонация.",
+      id: "srv_03", code: "№ 03", name: "Комплексная химчистка салона", price: 8500, duration: "6 ч",
+      desc: "Глубокая экстракторная чистка ковролина и кресел с антибактериальной обработкой.",
       photo: "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=900&q=85"
     }
   ],
@@ -239,57 +217,59 @@ const DEFAULTS = {
   ],
   addons: [
     { id: "opt_hydro", name: "Антидождь на полусферу", desc: "Стекла остаются сухими на скорости от 60 км/ч", price: 2000 },
-    { id: "opt_leather", name: "Консервация кожи спецсоставом", desc: "Защита от истирания, заломов и окрашивания одеждой", price: 2500 },
-    { id: "opt_engine", name: "Диэлектрическая мойка мотора", desc: "Безопасная очистка с консервацией электропроводки", price: 3000 }
+    { id: "opt_leather", name: "Консервация кожи спецсоставом", desc: "Защита от истирания и заломов", price: 2500 },
+    { id: "opt_engine", name: "Диэлектрическая мойка мотора", desc: "Безопасная очистка с консервацией проводки", price: 3000 }
   ]
 };
 
-// Единый слой доступа: параметры из URL немедленно обновляют базу данных слага
+// Безопасная инициализация один раз при загрузке без зацикливания
+function initStorageOnce() {
+  const urlServices = getServicesFromUrl();
+  if (urlServices) {
+    localStorage.setItem(storageKey("services"), JSON.stringify(urlServices));
+  } else if (!localStorage.getItem(storageKey("services"))) {
+    localStorage.setItem(storageKey("services"), JSON.stringify(DEFAULTS.services));
+  }
+
+  if (urlParams.get('name') || !localStorage.getItem(storageKey("settings"))) {
+    const curSettings = {
+      name: urlParams.get('name') || DEFAULTS.name,
+      category: urlParams.get('cat') || DEFAULTS.category,
+      address: urlParams.get('addr') || DEFAULTS.address,
+      phone: urlParams.get('phone') || DEFAULTS.phone,
+      pin: urlParams.get('pin') || DEFAULTS.pin
+    };
+    localStorage.setItem(storageKey("settings"), JSON.stringify(curSettings));
+  }
+
+  if (!localStorage.getItem(storageKey("slots"))) {
+    localStorage.setItem(storageKey("slots"), JSON.stringify(DEFAULTS.slots));
+  }
+  if (!localStorage.getItem(storageKey("addons"))) {
+    localStorage.setItem(storageKey("addons"), JSON.stringify(DEFAULTS.addons));
+  }
+}
+initStorageOnce();
+
+// Чистые геттеры без побочных эффектов записи
 const DB = {
   get settings() {
-    const raw = localStorage.getItem(storageKey("settings"));
-    const fromUrl = urlParams.get('name');
-    if (!raw || fromUrl) {
-      const initial = {
-        name: urlParams.get('name') || DEFAULTS.name,
-        category: urlParams.get('cat') || DEFAULTS.category,
-        address: urlParams.get('addr') || DEFAULTS.address,
-        phone: urlParams.get('phone') || DEFAULTS.phone,
-        pin: urlParams.get('pin') || DEFAULTS.pin
-      };
-      localStorage.setItem(storageKey("settings"), JSON.stringify(initial));
-      return initial;
-    }
-    return JSON.parse(raw);
+    return JSON.parse(localStorage.getItem(storageKey("settings")) || "{}");
   },
   set settings(v) { localStorage.setItem(storageKey("settings"), JSON.stringify(v)); },
 
   get services() {
-    const fromUrl = getInitialServicesFromUrl();
-    const raw = localStorage.getItem(storageKey("services"));
-    if (fromUrl) {
-      localStorage.setItem(storageKey("services"), JSON.stringify(fromUrl));
-      return fromUrl;
-    }
-    if (raw) return JSON.parse(raw);
-    localStorage.setItem(storageKey("services"), JSON.stringify(DEFAULTS.services));
-    return DEFAULTS.services;
+    return JSON.parse(localStorage.getItem(storageKey("services")) || "[]");
   },
   set services(v) { localStorage.setItem(storageKey("services"), JSON.stringify(v)); },
 
   get slots() {
-    const raw = localStorage.getItem(storageKey("slots"));
-    if (raw) return JSON.parse(raw);
-    localStorage.setItem(storageKey("slots"), JSON.stringify(DEFAULTS.slots));
-    return DEFAULTS.slots;
+    return JSON.parse(localStorage.getItem(storageKey("slots")) || "[]");
   },
   set slots(v) { localStorage.setItem(storageKey("slots"), JSON.stringify(v)); },
 
   get addons() {
-    const raw = localStorage.getItem(storageKey("addons"));
-    if (raw) return JSON.parse(raw);
-    localStorage.setItem(storageKey("addons"), JSON.stringify(DEFAULTS.addons));
-    return DEFAULTS.addons;
+    return JSON.parse(localStorage.getItem(storageKey("addons")) || "[]");
   },
   set addons(v) { localStorage.setItem(storageKey("addons"), JSON.stringify(v)); },
 
@@ -344,19 +324,19 @@ function renderLoginView(root) {
   const clientHref = "index.html" + window.location.search;
 
   root.innerHTML = `
-    <div class="p-6 pt-20 fade-in">
+    <div class="p-6 pt-20">
       <div class="text-center mb-8">
         <div class="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-3xl select-box mb-3 font-title font-extrabold">
           ⚙️
         </div>
-        <h1 class="font-title text-xl font-extrabold uppercase tracking-tight">${esc(conf.name)}</h1>
+        <h1 class="font-title text-xl font-extrabold uppercase tracking-tight" style="color:var(--text-primary)">${esc(conf.name || "Студия")}</h1>
         <p class="text-xs mt-1" style="color:var(--text-secondary)">Панель управления студией</p>
       </div>
 
       <div class="select-box rounded-3xl p-6 space-y-4">
         <form onsubmit="handleLogin(event)" class="space-y-4">
           <div>
-            <label class="text-[10px] font-bold uppercase tracking-wider block text-center mb-2" style="color:var(--text-secondary)">Введите PIN-код</label>
+            <label class="text-[11px] font-bold uppercase tracking-wider block text-center mb-2" style="color:var(--text-secondary)">Введите PIN-код</label>
             <input id="pin-input" type="password" inputmode="numeric" maxlength="6" autofocus placeholder="••••" required class="field-input pin-input">
           </div>
           <button type="submit" class="btn-action w-full">
@@ -366,7 +346,7 @@ function renderLoginView(root) {
       </div>
 
       <div class="text-center mt-6">
-        <a href="${clientHref}" class="text-xs font-semibold text-zinc-500 hover:text-white transition-colors">
+        <a href="${clientHref}" class="text-xs font-semibold hover:underline" style="color:var(--text-secondary)">
           ← Открыть клиентскую витрину
         </a>
       </div>
@@ -379,11 +359,11 @@ function handleLogin(e) {
   const input = $("pin-input");
   const conf = DB.settings;
 
-  if (input.value === conf.pin) {
+  if (input && input.value === String(conf.pin || "1234")) {
     sessionStorage.setItem(SESSION_AUTH_KEY, "1");
     render();
   } else {
-    input.value = "";
+    if (input) input.value = "";
     alert("Неверный PIN-код!");
   }
 }
@@ -410,9 +390,6 @@ function renderDashboardView(root) {
         <a href="${clientHref}" target="_blank" class="text-[11px] font-bold px-2.5 py-1.5 rounded-lg border select-box">
           Витрина ↗
         </a>
-        <button onclick="triggerAdminPwaInstall()" title="Установить CRM на рабочий стол" class="text-[11px] font-bold px-2 py-1.5 rounded-lg border select-box">
-          📲
-        </button>
         <button onclick="applyTheme(S.theme === 'dark' ? 'light' : 'dark')" class="text-[11px] font-bold px-2 py-1.5 rounded-lg border select-box">
           ${S.theme === 'dark' ? '☀️' : '🌙'}
         </button>
@@ -422,7 +399,7 @@ function renderDashboardView(root) {
       </div>
     </header>
 
-    <main class="fade-in px-5 pt-4">
+    <main class="px-5 pt-4">
       ${S.tab === "bookings" ? renderBookingsTab(bookings) : ""}
       ${S.tab === "services" ? renderServicesTab() : ""}
       ${S.tab === "slots" ? renderSlotsTab() : ""}
@@ -477,7 +454,7 @@ function renderBookingsTab(bookings) {
           placeholder="Поиск по авто, номеру, клиенту..." 
           class="field-input pl-9"
         >
-        <span class="absolute left-3 top-2.5 text-xs" style="color:var(--text-secondary)">🔍</span>
+        <span class="absolute left-3 top-3 text-xs" style="color:var(--text-secondary)">🔍</span>
       </div>
 
       <div class="flex rounded-xl p-1 border select-box">
@@ -635,7 +612,7 @@ function renderServicesTab() {
                 ✏ Редактировать
               </button>
               <button onclick="deleteService('${s.id}')" class="p-1.5 rounded-xl border select-box text-xs text-red-400">
-                🗑️️
+                🗑
               </button>
             </div>
           </div>
@@ -660,7 +637,7 @@ function openServiceModal(id = null) {
   const modal = $("modal-root");
   modal.innerHTML = `
     <div class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end justify-center p-3">
-      <div class="w-full max-w-[440px] rounded-3xl p-6 border fade-in space-y-4" style="background:var(--bg-app); border-color:var(--border-color);">
+      <div class="w-full max-w-[440px] rounded-3xl p-6 border space-y-4" style="background:var(--bg-app); border-color:var(--border-color);">
         <div class="flex justify-between items-center pb-2 border-b" style="border-color:var(--border-color);">
           <h3 class="font-title text-sm font-extrabold uppercase">${id ? 'Редактировать услугу' : 'Новый комплекс'}</h3>
           <button onclick="closeModal()" class="text-sm font-bold" style="color:var(--text-secondary)">✕</button>
@@ -725,7 +702,6 @@ function saveServiceForm(e, id) {
   e.preventDefault();
   let list = DB.services;
   const existingIdx = list.findIndex(x => x.id === id);
-
   const priceVal = Number($("f_srv_price").value) || 0;
 
   const payload = {
@@ -830,7 +806,7 @@ function openAddSlotModal() {
   const modal = $("modal-root");
   modal.innerHTML = `
     <div class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end justify-center p-3">
-      <div class="w-full max-w-[440px] rounded-3xl p-6 border fade-in space-y-4" style="background:var(--bg-app); border-color:var(--border-color);">
+      <div class="w-full max-w-[440px] rounded-3xl p-6 border space-y-4" style="background:var(--bg-app); border-color:var(--border-color);">
         <div class="flex justify-between items-center pb-2 border-b" style="border-color:var(--border-color);">
           <h3 class="font-title text-sm font-extrabold uppercase">Добавить рабочий слот</h3>
           <button onclick="closeModal()" class="text-sm font-bold" style="color:var(--text-secondary)">✕</button>
@@ -925,7 +901,7 @@ function openAddonModal() {
   const modal = $("modal-root");
   modal.innerHTML = `
     <div class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end justify-center p-3">
-      <div class="w-full max-w-[440px] rounded-3xl p-6 border fade-in space-y-4" style="background:var(--bg-app); border-color:var(--border-color);">
+      <div class="w-full max-w-[440px] rounded-3xl p-6 border space-y-4" style="background:var(--bg-app); border-color:var(--border-color);">
         <div class="flex justify-between items-center pb-2 border-b" style="border-color:var(--border-color);">
           <h3 class="font-title text-sm font-extrabold uppercase">Новая доп. услуга</h3>
           <button onclick="closeModal()" class="text-sm font-bold" style="color:var(--text-secondary)">✕</button>
@@ -1038,38 +1014,7 @@ function closeModal() {
   if (m) m.innerHTML = "";
 }
 
-// === УПРАВЛЕНИЕ PWA УСТАНОВКОЙ АДМИНКИ ===
-let adminDeferredPrompt = null;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  adminDeferredPrompt = e;
-});
-
-function triggerAdminPwaInstall() {
-  if (adminDeferredPrompt) {
-    adminDeferredPrompt.prompt();
-    adminDeferredPrompt.userChoice.then(() => {
-      adminDeferredPrompt = null;
-    });
-  } else {
-    alert("Нажмите кнопку 'Поделиться' в Safari (или 3 точки в Chrome) и выберите 'На экран Домой', чтобы установить CRM как приложение.");
-  }
-}
-
-// === РЕГИСТРАЦИЯ SERVICE WORKER ДЛЯ АДМИНКИ ===
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js', { scope: './' })
-      .then((reg) => {
-        console.log('CRM Service Worker зарегистрирован:', reg.scope);
-      })
-      .catch((err) => {
-        console.warn('Ошибка регистрации SW в админке:', err);
-      });
-  });
-}
-
-window.addEventListener("storage", render);
+// Запуск при старте страницы
 render();
 </script>
 </body>
