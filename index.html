@@ -223,36 +223,44 @@ const urlParams = new URLSearchParams(window.location.search);
 const slug = urlParams.get('slug') || urlParams.get('name') || "apex";
 const storageKey = key => `${slug}_${key}`;
 
+// Чтение переданных из create.html комплексов и ссылок на фото
+function getInitialServicesFromUrl() {
+  const list = [];
+  for (let i = 1; i <= 6; i++) {
+    const name = urlParams.get(`s${i}_name`);
+    if (name) {
+      list.push({
+        id: `srv_0${i}`,
+        code: `№ 0${i}`,
+        name: name,
+        price: Number(urlParams.get(`s${i}_price`)) || 0,
+        duration: urlParams.get(`s${i}_dur`) || "2 ч",
+        desc: urlParams.get(`s${i}_desc`) || "Профессиональный детейлинг-уход по технологической карте студии.",
+        photo: urlParams.get(`s${i}_photo`) || "https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&w=900&q=85"
+      });
+    }
+  }
+  return list.length ? list : null;
+}
+
 const DEFAULTS = {
   name: urlParams.get('name') || "APEX Детейлинг",
   category: urlParams.get('cat') || "Центр ухода & защиты кузова",
   address: urlParams.get('addr') || "ул. Промышленная, 18, бокс 4",
   phone: urlParams.get('phone') || "+7 (999) 000-00-00",
-  services: [
+  services: getInitialServicesFromUrl() || [
     {
-      id: "srv_01",
-      code: "№ 01",
-      name: "Трехфазная детейлинг-мойка",
-      price: 2500,
-      duration: "1.5 ч",
+      id: "srv_01", code: "№ 01", name: "Трехфазная детейлинг-мойка", price: 2500, duration: "1.5 ч",
       desc: "Бережная очистка кузова пористой губкой, удаление битумных точек и пыли тормозных колодок, сушка турбовоздухом.",
       photo: "https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&w=900&q=85"
     },
     {
-      id: "srv_02",
-      code: "№ 02",
-      name: "Мягкая восстановительная полировка",
-      price: 12000,
-      duration: "8 ч",
+      id: "srv_02", code: "№ 02", name: "Мягкая восстановительная полировка", price: 12000, duration: "8 ч",
       desc: "Устранение паутины, мелких царапин и матовости. Возвращение глубокого зеркального глянца и насыщенности цвета ЛКП.",
       photo: "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=900&q=85"
     },
     {
-      id: "srv_03",
-      code: "№ 03",
-      name: "Комплексная химчистка салона",
-      price: 8500,
-      duration: "6 ч",
+      id: "srv_03", code: "№ 03", name: "Комплексная химчистка салона", price: 8500, duration: "6 ч",
       desc: "Глубокая экстракторная чистка ковролина и кресел с антибактериальной обработкой, деликатная консервация кожи и озонация.",
       photo: "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=900&q=85"
     }
@@ -270,23 +278,30 @@ const DEFAULTS = {
   ]
 };
 
+// ЕДИНЫЙ СЛОЙ ХРАНИЛИЩА (Приоритет: localStorage -> URL -> DEFAULTS)
 const DB = {
   get settings() {
-    return JSON.parse(localStorage.getItem(storageKey("settings")) || JSON.stringify({
-      name: DEFAULTS.name,
-      category: DEFAULTS.category,
-      address: DEFAULTS.address,
-      phone: DEFAULTS.phone
-    }));
+    const raw = localStorage.getItem(storageKey("settings"));
+    if (raw) return JSON.parse(raw);
+    return {
+      name: urlParams.get('name') || DEFAULTS.name,
+      category: urlParams.get('cat') || DEFAULTS.category,
+      address: urlParams.get('addr') || DEFAULTS.address,
+      phone: urlParams.get('phone') || DEFAULTS.phone
+    };
   },
   get services() {
-    return JSON.parse(localStorage.getItem(storageKey("services")) || JSON.stringify(DEFAULTS.services));
+    const raw = localStorage.getItem(storageKey("services"));
+    if (raw) return JSON.parse(raw);
+    return getInitialServicesFromUrl() || DEFAULTS.services;
   },
   get slots() {
-    return JSON.parse(localStorage.getItem(storageKey("slots")) || JSON.stringify(DEFAULTS.slots));
+    const raw = localStorage.getItem(storageKey("slots"));
+    return raw ? JSON.parse(raw) : DEFAULTS.slots;
   },
   get addons() {
-    return JSON.parse(localStorage.getItem(storageKey("addons")) || JSON.stringify(DEFAULTS.addons));
+    const raw = localStorage.getItem(storageKey("addons"));
+    return raw ? JSON.parse(raw) : DEFAULTS.addons;
   },
   get bookings() {
     return JSON.parse(localStorage.getItem(storageKey("bookings")) || "[]");
