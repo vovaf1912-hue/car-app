@@ -4,12 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#080a0d" id="meta-theme">
+
+<!-- Мета-теги для PWA и нативного режима iOS/Android -->
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Детейлинг">
-<title id="page-title">Онлайн-запись в студию</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%23080a0d'/><text x='50%25' y='60%25' dominant-baseline='middle' text-anchor='middle' font-size='100'>🏎️</text></svg>">
+<link rel="manifest" href="./manifest.json">
 
-<link rel="manifest" href='data:application/manifest+json,{"name":"Детейлинг Запись","short_name":"Детейлинг","start_url":".","display":"standalone","background_color":"#080a0d","theme_color":"#080a0d"}'>
+<title id="page-title">Онлайн-запись в студию</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -223,7 +227,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const slug = urlParams.get('slug') || urlParams.get('name') || "apex";
 const storageKey = key => `${slug}_${key}`;
 
-// Чтение переданных из create.html комплексов и ссылок на фото
+// Чтение комплексов и ссылок на фото из URL
 function getInitialServicesFromUrl() {
   const list = [];
   for (let i = 1; i <= 6; i++) {
@@ -278,30 +282,45 @@ const DEFAULTS = {
   ]
 };
 
-// ЕДИНЫЙ СЛОЙ ХРАНИЛИЩА (Приоритет: localStorage -> URL -> DEFAULTS)
+// Единый слой доступа к данным: если в URL переданы свежие данные — сохраняем их в localStorage
 const DB = {
   get settings() {
     const raw = localStorage.getItem(storageKey("settings"));
-    if (raw) return JSON.parse(raw);
-    return {
-      name: urlParams.get('name') || DEFAULTS.name,
-      category: urlParams.get('cat') || DEFAULTS.category,
-      address: urlParams.get('addr') || DEFAULTS.address,
-      phone: urlParams.get('phone') || DEFAULTS.phone
-    };
+    const fromUrl = urlParams.get('name');
+    if (!raw || fromUrl) {
+      const initial = {
+        name: urlParams.get('name') || DEFAULTS.name,
+        category: urlParams.get('cat') || DEFAULTS.category,
+        address: urlParams.get('addr') || DEFAULTS.address,
+        phone: urlParams.get('phone') || DEFAULTS.phone
+      };
+      localStorage.setItem(storageKey("settings"), JSON.stringify(initial));
+      return initial;
+    }
+    return JSON.parse(raw);
   },
   get services() {
+    const fromUrl = getInitialServicesFromUrl();
     const raw = localStorage.getItem(storageKey("services"));
+    if (fromUrl) {
+      localStorage.setItem(storageKey("services"), JSON.stringify(fromUrl));
+      return fromUrl;
+    }
     if (raw) return JSON.parse(raw);
-    return getInitialServicesFromUrl() || DEFAULTS.services;
+    localStorage.setItem(storageKey("services"), JSON.stringify(DEFAULTS.services));
+    return DEFAULTS.services;
   },
   get slots() {
     const raw = localStorage.getItem(storageKey("slots"));
-    return raw ? JSON.parse(raw) : DEFAULTS.slots;
+    if (raw) return JSON.parse(raw);
+    localStorage.setItem(storageKey("slots"), JSON.stringify(DEFAULTS.slots));
+    return DEFAULTS.slots;
   },
   get addons() {
     const raw = localStorage.getItem(storageKey("addons"));
-    return raw ? JSON.parse(raw) : DEFAULTS.addons;
+    if (raw) return JSON.parse(raw);
+    localStorage.setItem(storageKey("addons"), JSON.stringify(DEFAULTS.addons));
+    return DEFAULTS.addons;
   },
   get bookings() {
     return JSON.parse(localStorage.getItem(storageKey("bookings")) || "[]");
@@ -424,7 +443,7 @@ function render() {
           <span class="text-[9px] font-bold block uppercase">Талон</span>
         </button>
 
-        <button onclick="S.tab='pwa';render()" class="flex-1 py-1.5 rounded-xl text-center select-box ${S.tab==='pwa' ? 'is-selected' : ''}">
+        <button onclick="triggerPwaInstall()" class="flex-1 py-1.5 rounded-xl text-center select-box ${S.tab==='pwa' ? 'is-selected' : ''}">
           <span class="text-sm block">📲</span>
           <span class="text-[9px] font-bold block uppercase">В телефон</span>
         </button>
@@ -680,6 +699,25 @@ function enableDragScroll(id) {
     const walk = (x - startX) * 1.5;
     el.scrollLeft = scrollLeft - walk;
   });
+}
+
+// === УПРАВЛЕНИЕ PWA УСТАНОВКОЙ ===
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+
+function triggerPwaInstall() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      deferredPrompt = null;
+    });
+  } else {
+    S.tab = 'pwa';
+    render();
+  }
 }
 
 function renderPwaGuideView() {
