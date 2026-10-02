@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#080a0d" id="meta-theme">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Детейлинг">
 <title id="page-title">Онлайн-запись в студию</title>
 
 <link rel="manifest" href='data:application/manifest+json,{"name":"Детейлинг Запись","short_name":"Детейлинг","start_url":".","display":"standalone","background_color":"#080a0d","theme_color":"#080a0d"}'>
@@ -147,7 +148,6 @@
   }
   .field-input:focus { border-bottom-color: var(--text-primary); }
 
-  /* Плавный скролл для услуг и дат на смартфонах и ПК */
   .scroll-touch-row {
     display: flex;
     overflow-x: auto;
@@ -158,7 +158,6 @@
   }
   .scroll-touch-row:active { cursor: grabbing; }
 
-  /* Фиксированная шторка бронирования */
   .floating-bar {
     position: fixed;
     bottom: 64px;
@@ -174,7 +173,6 @@
     z-index: 35;
   }
 
-  /* Нижняя навигация */
   .bottom-dock {
     position: fixed;
     bottom: 0;
@@ -221,12 +219,10 @@
 </div>
 
 <script>
-// Считываем слаг студии из адреса (например, ?slug=sanadetail)
 const urlParams = new URLSearchParams(window.location.search);
 const slug = urlParams.get('slug') || urlParams.get('name') || "apex";
 const storageKey = key => `${slug}_${key}`;
 
-// Базовые значения (показываются только если админка ещё ни разу не сохранялась)
 const DEFAULTS = {
   name: urlParams.get('name') || "APEX Детейлинг",
   category: urlParams.get('cat') || "Центр ухода & защиты кузова",
@@ -274,7 +270,6 @@ const DEFAULTS = {
   ]
 };
 
-// ЕДИНЫЙ СЛОЙ ХРАНИЛИЩА (ЧИТАЕТ ПРЯМО ИЗ БАЗЫ АДМИНКИ)
 const DB = {
   get settings() {
     return JSON.parse(localStorage.getItem(storageKey("settings")) || JSON.stringify({
@@ -371,7 +366,6 @@ function render() {
   document.getElementById("page-title").innerText = `${conf.name} — Запись онлайн`;
 
   root.innerHTML = `
-    <!-- Аккуратная верхняя шапка -->
     <header class="sticky top-0 z-30 px-5 py-3 border-b flex items-center justify-between" style="background:var(--float-bar-bg); border-color:var(--border-color); backdrop-filter:blur(24px);">
       <div>
         <div class="font-title text-sm font-extrabold uppercase tracking-tight" style="color:var(--text-primary)">${esc(conf.name)}</div>
@@ -390,7 +384,6 @@ function render() {
     </main>
 
     ${S.tab === "book" ? `
-      <!-- Плавающая шторка бронирования -->
       <div class="floating-bar">
         <div class="flex items-center justify-between gap-3">
           <div>
@@ -404,7 +397,6 @@ function render() {
       </div>
     ` : ""}
 
-    <!-- Нижняя мобильная навигация (Dock) -->
     <nav class="bottom-dock">
       <div class="flex items-center justify-between gap-2">
         <button onclick="S.tab='book';render()" class="flex-1 py-1.5 rounded-xl text-center select-box ${S.tab==='book' ? 'is-selected' : ''}">
@@ -427,7 +419,6 @@ function render() {
     <div id="modal-container"></div>
   `;
 
-  // Инициализация drag-скролла мышкой для ПК
   if (S.tab === "book") {
     requestAnimationFrame(() => {
       enableDragScroll("services-scroll");
@@ -443,7 +434,6 @@ function renderBookingLayout() {
 
   return `
     <div class="space-y-6 pt-3">
-      <!-- 01 Главный баннер выбранной услуги -->
       <div class="px-5">
         <div class="relative w-full h-52 overflow-hidden rounded-2xl border" style="border-color:var(--border-color);">
           <img id="hero-img" src="${currentSrv.photo}" class="w-full h-full object-cover grayscale contrast-125" alt="Превью">
@@ -461,7 +451,6 @@ function renderBookingLayout() {
         <p id="hero-desc" class="text-xs leading-relaxed mt-2.5" style="color:var(--text-secondary)">${esc(currentSrv.desc)}</p>
       </div>
 
-      <!-- 02 Горизонтальный скролл услуг (прокрутка вправо работает свободно) -->
       <div class="px-5">
         <div class="flex justify-between items-center mb-2.5">
           <div class="text-[11px] font-bold uppercase tracking-wider" style="color:var(--text-secondary)">1. Выберите комплекс (${servicesList.length})</div>
@@ -482,7 +471,6 @@ function renderBookingLayout() {
         </div>
       </div>
 
-      <!-- 03 Горизонтальный скролл дат заезда на 14 дней -->
       <div class="px-5">
         <div class="flex justify-between items-center mb-2.5">
           <div class="text-[11px] font-bold uppercase tracking-wider" style="color:var(--text-secondary)">2. Дата заезда</div>
@@ -506,7 +494,6 @@ function renderBookingLayout() {
         </div>
       </div>
 
-      <!-- 04 Боксы и посты (подтягиваются из конструктора админки) -->
       <div class="px-5">
         <div class="text-[11px] font-bold uppercase tracking-wider mb-2.5" style="color:var(--text-secondary)">3. Время и свободный бокс</div>
         <div id="slots-grid" class="grid grid-cols-2 gap-2.5">
@@ -514,7 +501,6 @@ function renderBookingLayout() {
         </div>
       </div>
 
-      <!-- 05 Дополнительные опции (подтягиваются из админки) -->
       <div class="px-5 pb-4">
         <div class="text-[11px] font-bold uppercase tracking-wider mb-2.5" style="color:var(--text-secondary)">4. Дополнительные опции</div>
         <div class="border rounded-2xl divide-y overflow-hidden select-box" style="border-color:var(--border-color); padding:0;">
@@ -656,7 +642,6 @@ function updateTotalFast() {
   }
 }
 
-// === ПОДДЕРЖКА ПЕРЕТАСКИВАНИЯ СКРОЛЛА МЫШКОЙ НА ПК ===
 function enableDragScroll(id) {
   const el = $(id);
   if (!el || el.dataset.dragReady === "1") return;
@@ -973,7 +958,19 @@ function initCanvasParticles() {
   loop();
 }
 
-// При любых изменениях в админке клиент моментально перерисовывается
+// === РЕГИСТРАЦИЯ PWA SERVICE WORKER ===
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then((reg) => {
+        console.log('PWA Service Worker зарегистрирован:', reg.scope);
+      })
+      .catch((err) => {
+        console.warn('Ошибка регистрации Service Worker:', err);
+      });
+  });
+}
+
 window.addEventListener("storage", render);
 render();
 initCanvasParticles();
