@@ -1,0 +1,991 @@
+<!doctype html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#080a0d" id="meta-theme">
+<title id="admin-title">CRM Панель управления</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-page: #e2e5ea;
+    --bg-app: #ffffff;
+    --card-surface: rgba(245, 247, 250, 0.95);
+    --border-color: rgba(226, 232, 240, 0.9);
+    --text-primary: #09090b;
+    --text-secondary: #64748b;
+    --btn-bg: #09090b;
+    --btn-text: #ffffff;
+    --item-selected-bg: #09090b;
+    --item-selected-text: #ffffff;
+    --float-bar-bg: rgba(255, 255, 255, 0.92);
+  }
+
+  html[data-theme="dark"] {
+    --bg-page: #000000;
+    --bg-app: #080a0d;
+    --card-surface: rgba(15, 18, 24, 0.85);
+    --border-color: rgba(255, 255, 255, 0.08);
+    --text-primary: #f8fafc;
+    --text-secondary: #8492a6;
+    --btn-bg: #ffffff;
+    --btn-text: #080a0d;
+    --item-selected-bg: #ffffff;
+    --item-selected-text: #080a0d;
+    --float-bar-bg: rgba(8, 10, 13, 0.92);
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+  ::-webkit-scrollbar { display: none; }
+
+  .font-title { font-family: 'Manrope', sans-serif; letter-spacing: -0.025em; }
+
+  .app-shell {
+    width: 100%;
+    max-width: 440px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: var(--bg-app);
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    position: relative;
+    padding-bottom: 110px;
+    box-shadow: 0 25px 70px -15px rgba(0,0,0,0.4);
+  }
+
+  .select-box {
+    border: 1px solid var(--border-color);
+    background: var(--card-surface);
+    color: var(--text-primary);
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .select-box:active { transform: scale(0.98); }
+  .select-box.is-selected {
+    background: var(--item-selected-bg) !important;
+    color: var(--item-selected-text) !important;
+    border-color: var(--item-selected-bg) !important;
+  }
+  .select-box.is-selected * { color: var(--item-selected-text) !important; }
+
+  .btn-action {
+    background-color: var(--btn-bg);
+    color: var(--btn-text);
+    border-radius: 9999px;
+    height: 48px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    transition: transform 0.12s ease;
+  }
+  .btn-action:active { transform: scale(0.98); }
+
+  .field-input {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+  .field-input:focus { border-color: var(--text-primary); }
+
+  .pin-input {
+    letter-spacing: 0.4em;
+    font-size: 26px;
+    font-weight: 800;
+    text-align: center;
+    border-radius: 16px;
+    padding: 14px;
+  }
+
+  .floating-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 440px;
+    background: var(--float-bar-bg);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-top: 1px solid var(--border-color);
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+    z-index: 40;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .status-new { color: #f97316; background: rgba(249, 115, 22, 0.15); border: 1px solid rgba(249, 115, 22, 0.3); }
+  .status-confirmed { color: #10b981; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); }
+  .status-cancelled { color: #ef4444; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+  .fade-in { animation: fadeIn 0.15s ease-out forwards; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+
+<div class="app-shell" id="app">
+  <div class="relative z-10" id="app-root"></div>
+</div>
+
+<script>
+"use strict";
+
+const urlParams = new URLSearchParams(window.location.search);
+const slug = urlParams.get('slug') || urlParams.get('name') || "apex";
+const storageKey = key => `${slug}_${key}`;
+
+const DEFAULTS = {
+  name: urlParams.get('name') || "APEX Детейлинг",
+  category: urlParams.get('cat') || "Центр ухода & защиты кузова",
+  address: urlParams.get('addr') || "ул. Промышленная, 18, бокс 4",
+  phone: urlParams.get('phone') || "+7 (999) 000-00-00",
+  pin: urlParams.get('pin') || "1234",
+  services: [
+    {
+      id: "srv_01",
+      code: "№ 01",
+      name: "Трехфазная детейлинг-мойка",
+      price: 2500,
+      duration: "1.5 ч",
+      desc: "Бережная очистка кузова пористой губкой, удаление битумных точек и пыли тормозных колодок, сушка турбовоздухом.",
+      photo: "https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&w=900&q=85"
+    },
+    {
+      id: "srv_02",
+      code: "№ 02",
+      name: "Мягкая восстановительная полировка",
+      price: 12000,
+      duration: "8 ч",
+      desc: "Устранение паутины, мелких царапин и матовости. Возвращение глубокого зеркального глянца и насыщенности цвета ЛКП.",
+      photo: "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=900&q=85"
+    },
+    {
+      id: "srv_03",
+      code: "№ 03",
+      name: "Комплексная химчистка салона",
+      price: 8500,
+      duration: "6 ч",
+      desc: "Глубокая экстракторная чистка ковролина и кресел с антибактериальной обработкой, деликатная консервация кожи и озонация.",
+      photo: "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=900&q=85"
+    }
+  ],
+  slots: [
+    { id: "s1", time: "10:00", label: "Пост 1" },
+    { id: "s2", time: "13:30", label: "Пост 1" },
+    { id: "s3", time: "16:00", label: "Пост 2" },
+    { id: "s4", time: "19:00", label: "Пост 2" }
+  ],
+  addons: [
+    { id: "opt_hydro", name: "Антидождь на полусферу", desc: "Стекла остаются сухими на скорости от 60 км/ч", price: 2000 },
+    { id: "opt_leather", name: "Консервация кожи спецсоставом", desc: "Защита от истирания, заломов и окрашивания одеждой", price: 2500 },
+    { id: "opt_engine", name: "Диэлектрическая мойка мотора", desc: "Безопасная очистка с консервацией электропроводки", price: 3000 }
+  ]
+};
+
+const DB = {
+  get settings() {
+    return JSON.parse(localStorage.getItem(storageKey("settings")) || JSON.stringify({
+      name: DEFAULTS.name,
+      category: DEFAULTS.category,
+      address: DEFAULTS.address,
+      phone: DEFAULTS.phone,
+      pin: DEFAULTS.pin
+    }));
+  },
+  set settings(v) { localStorage.setItem(storageKey("settings"), JSON.stringify(v)); },
+
+  get services() {
+    return JSON.parse(localStorage.getItem(storageKey("services")) || JSON.stringify(DEFAULTS.services));
+  },
+  set services(v) { localStorage.setItem(storageKey("services"), JSON.stringify(v)); },
+
+  get slots() {
+    return JSON.parse(localStorage.getItem(storageKey("slots")) || JSON.stringify(DEFAULTS.slots));
+  },
+  set slots(v) { localStorage.setItem(storageKey("slots"), JSON.stringify(v)); },
+
+  get addons() {
+    return JSON.parse(localStorage.getItem(storageKey("addons")) || JSON.stringify(DEFAULTS.addons));
+  },
+  set addons(v) { localStorage.setItem(storageKey("addons"), JSON.stringify(v)); },
+
+  get bookings() {
+    return JSON.parse(localStorage.getItem(storageKey("bookings")) || "[]");
+  },
+  set bookings(v) { localStorage.setItem(storageKey("bookings"), JSON.stringify(v)); },
+
+  get blocked() {
+    return JSON.parse(localStorage.getItem(storageKey("blocked")) || "[]");
+  },
+  set blocked(v) { localStorage.setItem(storageKey("blocked"), JSON.stringify(v)); }
+};
+
+const SESSION_AUTH_KEY = `admin_auth_${slug}`;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[m]));
+const money = n => new Intl.NumberFormat("ru-RU").format(Number(n) || 0) + " ₽";
+const uid = prefix => (prefix || "ID-") + Math.random().toString(36).slice(2, 7).toUpperCase();
+
+let S = {
+  theme: localStorage.getItem("theme") || "dark",
+  tab: "bookings",
+  filter: "all",
+  search: ""
+};
+
+function isAuth() { return sessionStorage.getItem(SESSION_AUTH_KEY) === "1"; }
+
+function applyTheme(th) {
+  S.theme = th;
+  localStorage.setItem("theme", th);
+  document.documentElement.setAttribute("data-theme", th);
+  const meta = $("meta-theme");
+  if (meta) meta.setAttribute("content", th === "dark" ? "#080a0d" : "#ffffff");
+  render();
+}
+
+function render() {
+  const root = $("app-root");
+  document.documentElement.setAttribute("data-theme", S.theme);
+
+  if (!isAuth()) {
+    renderLoginView(root);
+  } else {
+    renderDashboardView(root);
+  }
+}
+
+function renderLoginView(root) {
+  const conf = DB.settings;
+  const clientHref = "index.html" + window.location.search;
+
+  root.innerHTML = `
+    <div class="p-6 pt-20 fade-in">
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-3xl select-box mb-3 font-title font-extrabold">
+          ⚙️
+        </div>
+        <h1 class="font-title text-xl font-extrabold uppercase tracking-tight">${esc(conf.name)}</h1>
+        <p class="text-xs mt-1" style="color:var(--text-secondary)">Панель управления студией</p>
+      </div>
+
+      <div class="select-box rounded-3xl p-6 space-y-4">
+        <form onsubmit="handleLogin(event)" class="space-y-4">
+          <div>
+            <label class="text-[10px] font-bold uppercase tracking-wider block text-center mb-2" style="color:var(--text-secondary)">Введите PIN-код</label>
+            <input id="pin-input" type="password" inputmode="numeric" maxlength="6" autofocus placeholder="••••" required class="field-input pin-input">
+          </div>
+          <button type="submit" class="btn-action w-full">
+            Войти в CRM
+          </button>
+        </form>
+      </div>
+
+      <div class="text-center mt-6">
+        <a href="${clientHref}" class="text-xs font-semibold text-zinc-500 hover:text-white transition-colors">
+          ← Открыть клиентскую витрину
+        </a>
+      </div>
+    </div>
+  `;
+}
+
+function handleLogin(e) {
+  e.preventDefault();
+  const input = $("pin-input");
+  const conf = DB.settings;
+
+  if (input.value === conf.pin) {
+    sessionStorage.setItem(SESSION_AUTH_KEY, "1");
+    render();
+  } else {
+    input.value = "";
+    alert("Неверный PIN-код!");
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem(SESSION_AUTH_KEY);
+  render();
+}
+
+function renderDashboardView(root) {
+  const conf = DB.settings;
+  const bookings = DB.bookings;
+  const newCount = bookings.filter(b => b.status === "new").length;
+  const clientHref = "index.html" + window.location.search;
+
+  root.innerHTML = `
+    <header class="sticky top-0 z-30 px-5 py-3.5 border-b flex items-center justify-between" style="background:var(--float-bar-bg); border-color:var(--border-color); backdrop-filter:blur(24px);">
+      <div>
+        <div class="font-title text-sm font-extrabold uppercase tracking-tight" style="color:var(--text-primary)">${esc(conf.name)}</div>
+        <div class="text-[10px] font-bold uppercase tracking-wider" style="color:var(--text-secondary)">CRM Панель</div>
+      </div>
+
+      <div class="flex items-center gap-1.5">
+        <a href="${clientHref}" target="_blank" class="text-[11px] font-bold px-2.5 py-1.5 rounded-lg border select-box">
+          Витрина ↗
+        </a>
+        <button onclick="applyTheme(S.theme === 'dark' ? 'light' : 'dark')" class="text-[11px] font-bold px-2 py-1.5 rounded-lg border select-box">
+          ${S.theme === 'dark' ? '☀️' : '🌙'}
+        </button>
+        <button onclick="logout()" class="text-[11px] font-bold px-2.5 py-1.5 rounded-lg border select-box text-red-400">
+          Выйти
+        </button>
+      </div>
+    </header>
+
+    <main class="fade-in px-5 pt-4">
+      ${S.tab === "bookings" ? renderBookingsTab(bookings) : ""}
+      ${S.tab === "services" ? renderServicesTab() : ""}
+      ${S.tab === "slots" ? renderSlotsTab() : ""}
+      ${S.tab === "addons" ? renderAddonsTab() : ""}
+      ${S.tab === "settings" ? renderSettingsTab() : ""}
+    </main>
+
+    <nav class="floating-nav">
+      <div class="flex items-center justify-between gap-1">
+        ${[
+          ["bookings", "Заезды", "🚗", newCount],
+          ["services", "Услуги", "✨", 0],
+          ["slots", "Слоты", "⏱", 0],
+          ["addons", "Допы", "➕", 0],
+          ["settings", "Инфо", "⚙️", 0]
+        ].map(([t, label, icon, badge]) => `
+          <button onclick="switchTab('${t}')" class="flex-1 py-1.5 rounded-xl text-center relative select-box ${S.tab === t ? 'is-selected' : ''}">
+            ${badge > 0 ? `<span class="absolute top-1 right-2 w-2 h-2 rounded-full bg-orange-500"></span>` : ''}
+            <span class="text-sm block">${icon}</span>
+            <span class="text-[9px] font-bold block leading-none uppercase">${label}</span>
+          </button>
+        `).join("")}
+      </div>
+    </nav>
+
+    <div id="modal-root"></div>
+  `;
+}
+
+function switchTab(t) {
+  S.tab = t;
+  render();
+}
+
+function renderBookingsTab(bookings) {
+  const filtered = bookings.filter(b => {
+    if (S.filter !== "all" && b.status !== S.filter) return false;
+    if (S.search) {
+      const q = S.search.toLowerCase();
+      return (b.name?.toLowerCase().includes(q) || b.phone?.includes(q) || b.car?.toLowerCase().includes(q) || b.code?.toLowerCase().includes(q));
+    }
+    return true;
+  });
+
+  return `
+    <div class="space-y-4 pb-6">
+      <div class="relative">
+        <input 
+          id="search-input" 
+          value="${esc(S.search)}" 
+          oninput="S.search=this.value; renderBookingsContainer();" 
+          placeholder="Поиск по авто, номеру, клиенту..." 
+          class="field-input pl-9"
+        >
+        <span class="absolute left-3 top-2.5 text-xs" style="color:var(--text-secondary)">🔍</span>
+      </div>
+
+      <div class="flex rounded-xl p-1 border select-box">
+        ${[
+          ["all", "Все"],
+          ["new", "Новые"],
+          ["confirmed", "В работе"],
+          ["cancelled", "Отказ"]
+        ].map(([val, label]) => `
+          <button onclick="S.filter='${val}'; render();" class="flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${S.filter === val ? 'is-selected' : 'text-zinc-500'}">
+            ${label}
+          </button>
+        `).join("")}
+      </div>
+
+      <div id="bookings-container" class="space-y-3">
+        ${renderBookingsListHTML(filtered)}
+      </div>
+    </div>
+  `;
+}
+
+function renderBookingsListHTML(list) {
+  if (!list.length) {
+    return `<div class="select-box rounded-2xl p-8 text-center text-xs" style="color:var(--text-secondary)">Заявок в этой категории нет</div>`;
+  }
+
+  const srvList = DB.services;
+  const slotsList = DB.slots;
+
+  return list.map(b => {
+    const srv = srvList.find(s => s.id === b.service);
+    const slotObj = slotsList.find(x => x.id === b.slot);
+
+    return `
+      <div class="select-box rounded-2xl p-4 space-y-3">
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-title font-extrabold text-sm uppercase">${esc(b.car || "Авто не указано")}</span>
+              <span class="status-badge ${b.status === 'confirmed' ? 'status-confirmed' : b.status === 'cancelled' ? 'status-cancelled' : 'status-new'}">
+                ${b.status === 'confirmed' ? 'В боксе' : b.status === 'cancelled' ? 'Отказ' : 'Новая'}
+              </span>
+            </div>
+            <div class="text-[11px] font-bold mt-0.5 text-orange-400">${esc(b.plate || 'Без госномера')} · ${esc(b.name || "Гость")}</div>
+          </div>
+          <div class="text-right">
+            <div class="font-title text-sm font-extrabold">${money(b.sum)}</div>
+            <div class="text-[10px]" style="color:var(--text-secondary)">${b.date}</div>
+          </div>
+        </div>
+
+        <div class="p-2.5 rounded-xl border space-y-1 text-xs" style="border-color:var(--border-color); background:rgba(0,0,0,0.15)">
+          <div class="flex justify-between" style="color:var(--text-secondary)">
+            <span>Комплекс:</span>
+            <span class="font-bold" style="color:var(--text-primary)">${esc(srv?.name || b.service)}</span>
+          </div>
+          <div class="flex justify-between" style="color:var(--text-secondary)">
+            <span>Бокс / время:</span>
+            <span class="font-bold text-orange-400">${slotObj?.time || b.slot} (${slotObj?.label || ''})</span>
+          </div>
+          ${b.addons?.length ? `
+            <div class="pt-1 text-[11px] border-t" style="border-color:var(--border-color); color:var(--text-secondary)">
+              + ${b.addons.map(id => DB.addons.find(a => a.id === id)?.name).filter(Boolean).join(", ")}
+            </div>
+          ` : ''}
+        </div>
+
+        <a href="tel:${esc(b.phone)}" class="w-full py-2 rounded-xl border select-box text-xs font-bold flex items-center justify-center gap-1.5">
+          📞 ${esc(b.phone || "Позвонить")}
+        </a>
+
+        <div class="flex items-center gap-2 pt-1">
+          ${b.status !== 'confirmed' ? `
+            <button onclick="setBookingStatus('${b.id}', 'confirmed')" class="flex-1 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs">
+              ✓ Загнать
+            </button>
+          ` : ''}
+          ${b.status !== 'cancelled' ? `
+            <button onclick="setBookingStatus('${b.id}', 'cancelled')" class="flex-1 py-2 rounded-xl border select-box text-red-400 font-bold text-xs">
+              Отмена
+            </button>
+          ` : ''}
+          <button onclick="deleteBooking('${b.id}')" class="p-2 rounded-xl border select-box text-xs text-zinc-500 hover:text-red-400">
+            🗑️
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderBookingsContainer() {
+  const cont = $("bookings-container");
+  if (!cont) return;
+  const bookings = DB.bookings;
+  const filtered = bookings.filter(b => {
+    if (S.filter !== "all" && b.status !== S.filter) return false;
+    if (S.search) {
+      const q = S.search.toLowerCase();
+      return (b.name?.toLowerCase().includes(q) || b.phone?.includes(q) || b.car?.toLowerCase().includes(q) || b.code?.toLowerCase().includes(q));
+    }
+    return true;
+  });
+  cont.innerHTML = renderBookingsListHTML(filtered);
+}
+
+function setBookingStatus(id, st) {
+  const list = DB.bookings;
+  const item = list.find(x => x.id === id);
+  if (item) {
+    item.status = st;
+    DB.bookings = list;
+    render();
+  }
+}
+
+function deleteBooking(id) {
+  if (!confirm("Удалить этот заезд из CRM?")) return;
+  DB.bookings = DB.bookings.filter(x => x.id !== id);
+  render();
+}
+
+function renderServicesTab() {
+  const services = DB.services;
+
+  return `
+    <div class="space-y-4 pb-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="font-title text-base font-extrabold uppercase">Комплексы студии</h2>
+          <p class="text-[11px]" style="color:var(--text-secondary)">Добавляйте услуги и меняйте фото</p>
+        </div>
+        <button onclick="openServiceModal()" class="btn-action text-xs px-4 h-9">
+          + Добавить
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        ${services.map((s) => `
+          <div class="select-box rounded-2xl p-4 space-y-3">
+            <div class="flex gap-3">
+              <img src="${s.photo}" class="w-20 h-20 object-cover rounded-xl border" style="border-color:var(--border-color);" alt="Превью">
+              <div class="flex-1 min-w-0">
+                <span class="text-[10px] font-bold uppercase text-orange-400">${s.code} · ${s.duration}</span>
+                <h3 class="font-title text-sm font-extrabold truncate">${esc(s.name)}</h3>
+                <div class="font-title text-base font-black mt-1">${money(s.price)}</div>
+              </div>
+            </div>
+
+            <p class="text-xs line-clamp-2" style="color:var(--text-secondary)">${esc(s.desc)}</p>
+
+            <div class="flex items-center gap-2 pt-1 border-t" style="border-color:var(--border-color);">
+              <button onclick="openServiceModal('${s.id}')" class="flex-1 py-1.5 rounded-xl border select-box text-xs font-bold">
+                ✏️️ Редактировать
+              </button>
+              <button onclick="deleteService('${s.id}')" class="p-1.5 rounded-xl border select-box text-xs text-red-400">
+                🗑️
+              </button>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function openServiceModal(id = null) {
+  const services = DB.services;
+  const item = id ? services.find(x => x.id === id) : {
+    id: uid("srv_"),
+    code: `№ 0${services.length + 1}`,
+    name: "",
+    price: 3000,
+    duration: "2 ч",
+    desc: "",
+    photo: "https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&w=900&q=85"
+  };
+
+  const modal = $("modal-root");
+  modal.innerHTML = `
+    <div class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end justify-center p-3">
+      <div class="w-full max-w-[440px] rounded-3xl p-6 border fade-in space-y-4" style="background:var(--bg-app); border-color:var(--border-color);">
+        <div class="flex justify-between items-center pb-2 border-b" style="border-color:var(--border-color);">
+          <h3 class="font-title text-sm font-extrabold uppercase">${id ? 'Редактировать услугу' : 'Новый комплекс'}</h3>
+          <button onclick="closeModal()" class="text-sm font-bold" style="color:var(--text-secondary)">✕</button>
+        </div>
+
+        <form onsubmit="saveServiceForm(event, '${item.id}')" class="space-y-3">
+          <div>
+            <label class="text-[10px] font-bold uppercase block mb-1" style="color:var(--text-secondary)">Название услуги</label>
+            <input id="f_srv_name" required value="${esc(item.name)}" placeholder="Керамическое покрытие 9H" class="field-input">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[10px] font-bold uppercase block mb-1" style="color:var(--text-secondary)">Цена (₽)</label>
+              <input id="f_srv_price" type="number" required value="${item.price}" class="field-input">
+            </div>
+            <div>
+              <label class="text-[10px] font-bold uppercase block mb-1" style="color:var(--text-secondary)">Время бокса</label>
+              <input id="f_srv_duration" required value="${esc(item.duration)}" placeholder="3 ч / 1 день" class="field-input">
+            </div>
+          </div>
+
+          <div>
+            <label class="text-[10px] font-bold uppercase block mb-1" style="color:var(--text-secondary)">Описание услуги</label>
+            <textarea id="f_srv_desc" rows="2" class="field-input text-xs">${esc(item.desc)}</textarea>
+          </div>
+
+          <div class="p-3 rounded-2xl border space-y-2 select-box">
+            <label class="text-[10px] font-bold uppercase block" style="color:var(--text-secondary)">Фотография комплекса</label>
+            <div class="flex gap-3 items-center">
+              <img id="f_srv_img_preview" src="${item.photo}" class="w-14 h-14 object-cover rounded-xl border" style="border-color:var(--border-color);">
+              <div class="flex-1 space-y-1.5">
+                <input type="file" accept="image/*" id="f_srv_file" onchange="handleImageUpload(event)" class="text-xs w-full">
+                <input id="f_srv_photo_url" value="${esc(item.photo)}" oninput="$('f_srv_img_preview').src=this.value" placeholder="или ссылка на картинку" class="field-input text-[11px] py-1">
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-action w-full mt-2">
+            Сохранить комплекс
+          </button>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+function handleImageUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    const base64 = evt.target.result;
+    $("f_srv_img_preview").src = base64;
+    $("f_srv_photo_url").value = base64;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveServiceForm(e, id) {
+  e.preventDefault();
+  let list = DB.services;
+  const existingIdx = list.findIndex(x => x.id === id);
+
+  const priceVal = Number($("f_srv_price").value) || 0;
+
+  const payload = {
+    id: id,
+    code: existingIdx >= 0 ? list[existingIdx].code : `№ 0${list.length + 1}`,
+    name: $("f_srv_name").value.trim(),
+    price: priceVal,
+    duration: $("f_srv_duration").value.trim(),
+    desc: $("f_srv_desc").value.trim(),
+    photo: $("f_srv_photo_url").value.trim() || "https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&w=900&q=85"
+  };
+
+  if (existingIdx >= 0) {
+    list[existingIdx] = payload;
+  } else {
+    list.push(payload);
+  }
+
+  DB.services = list;
+  closeModal();
+  render();
+}
+
+function deleteService(id) {
+  if (!confirm("Удалить этот комплекс?")) return;
+  DB.services = DB.services.filter(x => x.id !== id);
+  render();
+}
+
+function renderSlotsTab() {
+  const slots = DB.slots;
+  const blocked = DB.blocked;
+
+  const daysList = Array.from({ length: 7 }, (_, i) => {
+    let d = new Date();
+    d.setDate(d.getDate() + i);
+    return d.toISOString().slice(0, 10);
+  });
+
+  return `
+    <div class="space-y-4 pb-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="font-title text-base font-extrabold uppercase">Конструктор окон</h2>
+          <p class="text-[11px]" style="color:var(--text-secondary)">Создавайте любое количество слотов</p>
+        </div>
+        <button onclick="openAddSlotModal()" class="btn-action text-xs px-3 h-9">
+          + Слот
+        </button>
+      </div>
+
+      <div class="p-3.5 rounded-2xl border select-box space-y-2">
+        <div class="text-[10px] font-bold uppercase tracking-wider" style="color:var(--text-secondary)">Действующие окна в системе:</div>
+        <div class="grid grid-cols-2 gap-2">
+          ${slots.map(sl => `
+            <div class="p-2.5 rounded-xl border flex items-center justify-between text-xs" style="border-color:var(--border-color); background:rgba(128,128,128,0.06)">
+              <div>
+                <span class="font-title font-extrabold" style="color:var(--text-primary)">${sl.time}</span>
+                <span class="text-[10px] block font-semibold" style="color:var(--text-secondary)">${esc(sl.label)}</span>
+              </div>
+              <button onclick="deleteSlot('${sl.id}')" class="text-xs text-red-500 font-bold p-1">✕</button>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="space-y-3 pt-2">
+        <div class="text-[11px] font-bold uppercase tracking-wider" style="color:var(--text-secondary)">Блокировка окон на 7 дней (нажмите, чтобы закрыть)</div>
+        ${daysList.map(d => {
+          const dateObj = new Date(d + "T12:00");
+          const dateFmt = dateObj.toLocaleDateString("ru-RU", { weekday: "short", day: "numeric", month: "short" });
+
+          return `
+            <div class="p-3.5 rounded-2xl border select-box space-y-2">
+              <div class="text-xs font-bold" style="color:var(--text-primary)">${dateFmt}</div>
+              <div class="grid grid-cols-4 gap-1.5">
+                ${slots.map(sl => {
+                  const key = d + "_" + sl.id;
+                  const isBlk = blocked.includes(key);
+
+                  return `
+                    <button onclick="toggleSlotBlock('${key}')" class="py-2 px-1 rounded-xl border text-center transition-all ${
+                      isBlk 
+                        ? 'bg-red-500/15 border-red-500/40 text-red-500' 
+                        : 'border-zinc-200 dark:border-zinc-800 bg-zinc-100/60 dark:bg-zinc-900/60'
+                    }">
+                      <div class="font-title text-xs font-extrabold ${isBlk ? 'text-red-500' : 'text-zinc-900 dark:text-zinc-100'}">${sl.time}</div>
+                      <div class="text-[9px] font-bold uppercase ${isBlk ? 'text-red-400' : 'text-zinc-500 dark:text-zinc-400'}">${isBlk ? 'Закрыт' : sl.label}</div>
+                    </button>
+                  `;
+                }).join("")}
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function openAddSlotModal() {
+  const modal = $("modal-root");
+  modal.innerHTML = `
+    <div class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end justify-center p-3">
+      <div class="w-full max-w-[440px] rounded-3xl p-6 border fade-in space-y-4" style="background:var(--bg-app); border-color:var(--border-color);">
+        <div class="flex justify-between items-center pb-2 border-b" style="border-color:var(--border-color);">
+          <h3 class="font-title text-sm font-extrabold uppercase">Добавить рабочий слот</h3>
+          <button onclick="closeModal()" class="text-sm font-bold" style="color:var(--text-secondary)">✕</button>
+        </div>
+
+        <form onsubmit="saveSlotForm(event)" class="space-y-3">
+          <div>
+            <label class="text-[10px] font-bold uppercase block mb-1" style="color:var(--text-secondary)">Время заезда</label>
+            <input id="f_slot_time" type="time" required value="12:00" class="field-input">
+          </div>
+
+          <div>
+            <label class="text-[10px] font-bold uppercase block mb-1" style="color:var(--text-secondary)">Название поста / бокса</label>
+            <input id="f_slot_label" required placeholder="Пост 3 / Детейлинг-зона" class="field-input">
+          </div>
+
+          <button type="submit" class="btn-action w-full mt-2">
+            Добавить окно
+          </button>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+function saveSlotForm(e) {
+  e.preventDefault();
+  const time = $("f_slot_time").value;
+  const label = $("f_slot_label").value.trim();
+
+  const slots = DB.slots;
+  slots.push({
+    id: uid("s_"),
+    time: time,
+    label: label
+  });
+
+  slots.sort((a,b) => a.time.localeCompare(b.time));
+  DB.slots = slots;
+  closeModal();
+  render();
+}
+
+function deleteSlot(id) {
+  if (!confirm("Удалить этот слот из системы?")) return;
+  DB.slots = DB.slots.filter(x => x.id !== id);
+  render();
+}
+
+function toggleSlotBlock(key) {
+  let b = DB.blocked;
+  if (b.includes(key)) b = b.filter(x => x !== key);
+  else b.push(key);
+  DB.blocked = b;
+  render();
+}
+
+function renderAddonsTab() {
+  const addons = DB.addons;
+
+  return `
+    <div class="space-y-4 pb-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="font-title text-base font-extrabold uppercase">Дополнительные опции</h2>
+          <p class="text-[11px]" style="color:var(--text-secondary)">Чекбоксы, которые клиент добавляет к брони</p>
+        </div>
+        <button onclick="openAddonModal()" class="btn-action text-xs px-3 h-9">
+          + Опция
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        ${addons.map(a => `
+          <div class="select-box rounded-2xl p-3.5 flex justify-between items-center">
+            <div>
+              <div class="font-title text-xs font-bold">${esc(a.name)}</div>
+              <div class="text-[11px] mt-0.5" style="color:var(--text-secondary)">${esc(a.desc)}</div>
+              <div class="font-title text-xs font-extrabold text-orange-400 mt-1">${money(a.price)}</div>
+            </div>
+            <button onclick="deleteAddon('${a.id}')" class="p-2 text-xs text-red-400 hover:text-red-300">
+              🗑️
+            </button>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function openAddonModal() {
+  const modal = $("modal-root");
+  modal.innerHTML = `
+    <div class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end justify-center p-3">
+      <div class="w-full max-w-[440px] rounded-3xl p-6 border fade-in space-y-4" style="background:var(--bg-app); border-color:var(--border-color);">
+        <div class="flex justify-between items-center pb-2 border-b" style="border-color:var(--border-color);">
+          <h3 class="font-title text-sm font-extrabold uppercase">Новая доп. услуга</h3>
+          <button onclick="closeModal()" class="text-sm font-bold" style="color:var(--text-secondary)">✕</button>
+        </div>
+
+        <form onsubmit="saveAddonForm(event)" class="space-y-3">
+          <div>
+            <label class="text-[10px] font-bold uppercase block mb-1" style="color:var(--text-secondary)">Название</label>
+            <input id="f_add_name" required placeholder="Озонирование салона" class="field-input">
+          </div>
+
+          <div>
+            <label class="text-[10px] font-bold uppercase block mb-1" style="color:var(--text-secondary)">Описание</label>
+            <input id="f_add_desc" placeholder="Удаление неприятных запахов" class="field-input">
+          </div>
+
+          <div>
+            <label class="text-[10px] font-bold uppercase block mb-1" style="color:var(--text-secondary)">Цена (₽)</label>
+            <input id="f_add_price" type="number" required value="1500" class="field-input">
+          </div>
+
+          <button type="submit" class="btn-action w-full mt-2">
+            Добавить опцию
+          </button>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+function saveAddonForm(e) {
+  e.preventDefault();
+  const addons = DB.addons;
+  addons.push({
+    id: uid("opt_"),
+    name: $("f_add_name").value.trim(),
+    desc: $("f_add_desc").value.trim(),
+    price: Number($("f_add_price").value) || 0
+  });
+  DB.addons = addons;
+  closeModal();
+  render();
+}
+
+function deleteAddon(id) {
+  if (!confirm("Удалить эту опцию?")) return;
+  DB.addons = DB.addons.filter(x => x.id !== id);
+  render();
+}
+
+function renderSettingsTab() {
+  const conf = DB.settings;
+
+  return `
+    <div class="space-y-4 pb-6">
+      <div>
+        <h2 class="font-title text-base font-extrabold uppercase">Настройки студии</h2>
+        <p class="text-[11px]" style="color:var(--text-secondary)">Эти данные выводятся на витрине и в WhatsApp</p>
+      </div>
+
+      <form onsubmit="saveSettingsForm(event)" class="select-box rounded-2xl p-4 space-y-3">
+        <div>
+          <label class="text-[10px] font-bold uppercase block mb-1" style="color:var(--text-secondary)">Название бизнеса</label>
+          <input id="set_name" required value="${esc(conf.name)}" class="field-input">
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold uppercase block mb-1" style="color:var(--text-secondary)">Категория / Подзаголовок</label>
+          <input id="set_cat" required value="${esc(conf.category)}" class="field-input">
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold uppercase block mb-1" style="color:var(--text-secondary)">Телефон (для заявок в WhatsApp)</label>
+          <input id="set_phone" required value="${esc(conf.phone)}" class="field-input">
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold uppercase block mb-1" style="color:var(--text-secondary)">Адрес студии</label>
+          <input id="set_addr" required value="${esc(conf.address)}" class="field-input">
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold uppercase block mb-1" style="color:var(--text-secondary)">Секретный PIN для входа</label>
+          <input id="set_pin" required type="password" value="${esc(conf.pin)}" class="field-input font-mono">
+        </div>
+
+        <button type="submit" class="btn-action w-full mt-2">
+          Сохранить настройки
+        </button>
+      </form>
+    </div>
+  `;
+}
+
+function saveSettingsForm(e) {
+  e.preventDefault();
+  DB.settings = {
+    name: $("set_name").value.trim(),
+    category: $("set_cat").value.trim(),
+    phone: $("set_phone").value.trim(),
+    address: $("set_addr").value.trim(),
+    pin: $("set_pin").value.trim()
+  };
+  alert("Настройки успешно сохранены!");
+  render();
+}
+
+function closeModal() {
+  const m = $("modal-root");
+  if (m) m.innerHTML = "";
+}
+
+window.addEventListener("storage", render);
+render();
+</script>
+</body>
+</html>

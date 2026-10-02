@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Генератор офферов для детейлингов</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    margin:0;
+    background:#080a0d;
+    color:#F1F5F9;
+    font-family:'Plus Jakarta Sans', sans-serif;
+  }
+  .font-title { font-family: 'Manrope', sans-serif; letter-spacing: -0.025em; }
+  .glass-card{
+    background:rgba(15, 18, 24, 0.85);
+    border:1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:0 12px 32px -8px rgba(0, 0, 0, 0.7);
+  }
+  .field{
+    width:100%;
+    background:rgba(0,0,0,0.45);
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius:12px;
+    padding:10px 14px;
+    color:#fff;
+    outline:none;
+    font-size:13px;
+    font-weight:600;
+    transition:border-color .15s ease;
+  }
+  .field:focus{border-color:#ffffff}
+  .btn-action{
+    background:#ffffff;
+    color:#080a0d;
+    border-radius:9999px;
+    height:46px;
+    font-family:'Manrope', sans-serif;
+    font-size:13px;
+    font-weight:800;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    transition:transform .12s ease;
+  }
+  .btn-action:active{transform:scale(0.98)}
+</style>
+</head>
+<body class="p-4 max-w-lg mx-auto pb-20">
+
+  <!-- Шапка генератора -->
+  <div class="flex items-center gap-3 mb-5 pt-2">
+    <div class="w-10 h-10 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center text-white font-title font-extrabold text-lg">
+      🏎️
+    </div>
+    <div>
+      <h1 class="text-base font-title font-extrabold text-white uppercase tracking-tight">Генератор офферов</h1>
+      <p class="text-[11px] text-zinc-400">Быстрая сборка персональных демо под автосервисы и детейлинги</p>
+    </div>
+  </div>
+
+  <div class="glass-card rounded-3xl p-5 space-y-4">
+    <!-- Название студии -->
+    <div>
+      <label class="block text-zinc-400 text-[11px] font-bold uppercase mb-1">Название студии / сервиса</label>
+      <input id="name" oninput="autoSlug()" placeholder="Например: Саня Детейлинг" class="field">
+    </div>
+
+    <!-- Slug (Идентификатор БД) и PIN -->
+    <div class="grid grid-cols-2 gap-2.5">
+      <div>
+        <label class="block text-zinc-400 text-[10px] font-bold uppercase mb-1">ID базы (slug в URL)</label>
+        <input id="slug" placeholder="sanya_detailing" class="field text-xs font-mono text-orange-400">
+      </div>
+      <div>
+        <label class="block text-zinc-400 text-[10px] font-bold uppercase mb-1">PIN для админки</label>
+        <input id="pin" value="1234" maxlength="6" class="field text-center font-bold tracking-widest">
+      </div>
+    </div>
+
+    <!-- Категория -->
+    <div>
+      <label class="block text-zinc-400 text-[11px] font-bold uppercase mb-1">Категория / Подзаголовок</label>
+      <input id="cat" value="Центр ухода & защиты кузова" class="field">
+    </div>
+
+    <!-- Адрес и Телефон -->
+    <div class="grid grid-cols-2 gap-2.5">
+      <div>
+        <label class="block text-zinc-400 text-[11px] font-bold uppercase mb-1">Адрес бокса</label>
+        <input id="addr" placeholder="ул. Ленина, 45, бокс 2" class="field">
+      </div>
+      <div>
+        <label class="block text-zinc-400 text-[11px] font-bold uppercase mb-1">Телефон владельца</label>
+        <input id="phone" placeholder="+7 (999) 000-00-00" class="field">
+      </div>
+    </div>
+
+    <!-- Услуги и цены -->
+    <div class="pt-3 border-t border-white/5 space-y-2.5">
+      <div class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">3 ключевые услуги из 2ГИС / Карт:</div>
+
+      <div class="grid grid-cols-3 gap-2">
+        <div class="col-span-2">
+          <input id="s1_name" value="Трехфазная детейлинг-мойка" placeholder="Услуга 1" class="field">
+        </div>
+        <div>
+          <input id="s1_price" type="number" step="100" value="2500" class="field text-right font-bold">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2">
+        <div class="col-span-2">
+          <input id="s2_name" value="Мягкая полировка кузова" placeholder="Услуга 2" class="field">
+        </div>
+        <div>
+          <input id="s2_price" type="number" step="500" value="12000" class="field text-right font-bold">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2">
+        <div class="col-span-2">
+          <input id="s3_name" value="Комплексная химчистка салона" placeholder="Услуга 3" class="field">
+        </div>
+        <div>
+          <input id="s3_price" type="number" step="500" value="8500" class="field text-right font-bold">
+        </div>
+      </div>
+    </div>
+
+    <button onclick="generate()" class="btn-action w-full mt-2">
+      ⚡ Собрать ссылки и питч
+    </button>
+  </div>
+
+  <!-- Результаты генерации -->
+  <div id="result" class="mt-5 hidden space-y-3.5">
+    
+    <!-- Витрина -->
+    <div class="glass-card rounded-2xl p-4 space-y-2">
+      <div class="flex justify-between items-center text-xs">
+        <span class="text-zinc-400 font-bold uppercase text-[10px]">1. Ссылка витрины (index.html):</span>
+        <div class="space-x-3">
+          <a id="clientTestLink" target="_blank" class="text-orange-400 font-bold hover:underline">Открыть ↗</a>
+          <button onclick="copyText('clientLinkText')" class="text-white font-bold hover:underline">Копировать</button>
+        </div>
+      </div>
+      <div id="clientLinkText" class="text-[11px] text-zinc-300 break-all p-2.5 rounded-xl bg-black/50 border border-white/5 font-mono select-all"></div>
+    </div>
+
+    <!-- Админка -->
+    <div class="glass-card rounded-2xl p-4 space-y-2">
+      <div class="flex justify-between items-center text-xs">
+        <span class="text-zinc-400 font-bold uppercase text-[10px]">2. Ссылка админки (admin.html):</span>
+        <div class="space-x-3">
+          <a id="adminTestLink" target="_blank" class="text-orange-400 font-bold hover:underline">Открыть ↗</a>
+          <button onclick="copyText('adminLinkText')" class="text-white font-bold hover:underline">Копировать</button>
+        </div>
+      </div>
+      <div id="adminLinkText" class="text-[11px] text-zinc-300 break-all p-2.5 rounded-xl bg-black/50 border border-white/5 font-mono select-all"></div>
+    </div>
+
+    <!-- Питч для отправки -->
+    <div class="glass-card rounded-2xl p-4 space-y-2">
+      <div class="flex justify-between items-center text-xs">
+        <span class="text-zinc-400 font-bold uppercase text-[10px]">Готовый питч для WhatsApp / Telegram:</span>
+        <button onclick="copyPitch()" class="text-white font-bold hover:underline">Скопировать весь текст</button>
+      </div>
+      <textarea id="pitchText" rows="10" class="field font-sans text-xs text-zinc-300 leading-relaxed"></textarea>
+      
+      <div class="grid grid-cols-2 gap-2 pt-2">
+        <button id="sendWaBtn" onclick="openWhatsApp()" class="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors">
+          💬 Написать в WhatsApp
+        </button>
+        <button id="sendTgBtn" onclick="openTelegram()" class="py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors">
+          ✈️ Написать в Telegram
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Транслитерация названия для автогенерации слага
+    function autoSlug() {
+      const val = document.getElementById('name').value.trim();
+      const ruToEn = {
+        'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'yo','ж':'zh','з':'z','и':'i','й':'y','к':'k','л':'l','м':'m',
+        'н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'h','ц':'c','ч':'ch','ш':'sh','щ':'sch','ъ':'',
+        'ы':'y','ь':'','э':'e','ю':'yu','я':'ya',' ':'_'
+      };
+      let slug = val.toLowerCase().split('').map(char => ruToEn[char] || (/[a-z0-9_]/.test(char) ? char : '')).join('');
+      document.getElementById('slug').value = slug || 'studio';
+    }
+
+    function generate() {
+      const base = window.location.origin + window.location.pathname.replace('create.html', '');
+
+      const nameVal = document.getElementById('name').value.trim() || 'Детейлинг Студия';
+      const slugVal = document.getElementById('slug').value.trim() || 'studio';
+      const catVal = document.getElementById('cat').value.trim() || 'Центр ухода & защиты кузова';
+      const pinVal = document.getElementById('pin').value.trim() || '1234';
+      const addrVal = document.getElementById('addr').value.trim() || 'ул. Промышленная, 18';
+      const phoneVal = document.getElementById('phone').value.trim() || '+7 (999) 000-00-00';
+
+      const s1_n = document.getElementById('s1_name').value.trim() || 'Трехфазная детейлинг-мойка';
+      const s1_p = document.getElementById('s1_price').value.trim() || '2500';
+      const s2_n = document.getElementById('s2_name').value.trim() || 'Мягкая полировка кузова';
+      const s2_p = document.getElementById('s2_price').value.trim() || '12000';
+      const s3_n = document.getElementById('s3_name').value.trim() || 'Комплексная химчистка салона';
+      const s3_p = document.getElementById('s3_price').value.trim() || '8500';
+
+      const params = new URLSearchParams({
+        slug: slugVal,
+        name: nameVal,
+        cat: catVal,
+        pin: pinVal,
+        addr: addrVal,
+        phone: phoneVal,
+        s1_name: s1_n,
+        s1_price: s1_p,
+        s2_name: s2_n,
+        s2_price: s2_p,
+        s3_name: s3_n,
+        s3_price: s3_p
+      });
+
+      const clientUrl = base + 'index.html?' + params.toString();
+      const adminUrl = base + 'admin.html?' + params.toString();
+
+      document.getElementById('clientLinkText').innerText = clientUrl;
+      document.getElementById('adminLinkText').innerText = adminUrl;
+      document.getElementById('clientTestLink').href = clientUrl;
+      document.getElementById('adminTestLink').href = adminUrl;
+
+      // Текст питча для холодной рассылки
+      document.getElementById('pitchText').value = 
+`Здравствуйте! Нашел вашу студию «${nameVal}» на картах.
+Заметил, что клиентам часто неудобно записываться на мойку и полировку без звонка (особенно когда мастера заняты в боксах и не могут взять трубку).
+
+Собрал под ваш сервис готовый рабочий прототип мобильной онлайн-записи с вашим названием и прайсом:
+👉 Витрина для клиентов: ${clientUrl}
+
+(Открывается по ссылке в браузере как WebApp-приложение без скачивания из App Store).
+
+Также настроил личный кабинет владельца (управление боксами, редактирование цен, просмотр заявок):
+👉 Панель управления: ${adminUrl}
+Ваш PIN-код для входа: ${pinVal}
+
+Если формат нравится — отдам готовый проект со всеми правами за 3 500 ₽ разово под ключ. Интересно подключить?`;
+
+      document.getElementById('result').classList.remove('hidden');
+      document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copyText(elementId) {
+      const text = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(text);
+      alert('Ссылка скопирована в буфер!');
+    }
+
+    function copyPitch() {
+      const t = document.getElementById('pitchText');
+      t.select();
+      navigator.clipboard.writeText(t.value);
+      alert('Текст питча скопирован!');
+    }
+
+    function openWhatsApp() {
+      const rawPhone = document.getElementById('phone').value.replace(/[^0-9]/g, '');
+      const text = encodeURIComponent(document.getElementById('pitchText').value);
+      if (!rawPhone) {
+        alert('Укажите номер телефона студии!');
+        return;
+      }
+      window.open(`https://wa.me/${rawPhone}?text=${text}`, '_blank');
+    }
+
+    function openTelegram() {
+      const rawPhone = document.getElementById('phone').value.replace(/[^0-9]/g, '');
+      if (!rawPhone) {
+        alert('Укажите номер телефона студии!');
+        return;
+      }
+      window.open(`https://t.me/+${rawPhone}`, '_blank');
+    }
+  </script>
+</body>
+</html>

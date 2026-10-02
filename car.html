@@ -1,0 +1,982 @@
+<!doctype html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#080a0d" id="meta-theme">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title id="page-title">Онлайн-запись в студию</title>
+
+<link rel="manifest" href='data:application/manifest+json,{"name":"Детейлинг Запись","short_name":"Детейлинг","start_url":".","display":"standalone","background_color":"#080a0d","theme_color":"#080a0d"}'>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-page: #e2e5ea;
+    --bg-app: #ffffff;
+    --card-surface: rgba(245, 247, 250, 0.85);
+    --border-color: rgba(226, 232, 240, 0.9);
+    --text-primary: #09090b;
+    --text-secondary: #64748b;
+    --btn-bg: #09090b;
+    --btn-text: #ffffff;
+    --btn-disabled: #e2e8f0;
+    --btn-disabled-text: #94a3b8;
+    --item-selected-bg: #09090b;
+    --item-selected-text: #ffffff;
+    --float-bar-bg: rgba(255, 255, 255, 0.92);
+    --beam-glow: rgba(59, 130, 246, 0.08);
+  }
+
+  html[data-theme="dark"] {
+    --bg-page: #000000;
+    --bg-app: #080a0d;
+    --card-surface: rgba(15, 18, 24, 0.85);
+    --border-color: rgba(255, 255, 255, 0.08);
+    --text-primary: #f8fafc;
+    --text-secondary: #8492a6;
+    --btn-bg: #ffffff;
+    --btn-text: #080a0d;
+    --btn-disabled: #151921;
+    --btn-disabled-text: #3f4756;
+    --item-selected-bg: #ffffff;
+    --item-selected-text: #080a0d;
+    --float-bar-bg: rgba(8, 10, 13, 0.92);
+    --beam-glow: rgba(249, 115, 22, 0.12);
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+  ::-webkit-scrollbar { display: none; }
+
+  .font-title { font-family: 'Manrope', sans-serif; letter-spacing: -0.025em; }
+
+  .app-shell {
+    width: 100%;
+    max-width: 440px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: var(--bg-app);
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+    padding-bottom: 150px;
+    box-shadow: 0 25px 70px -15px rgba(0, 0, 0, 0.35);
+  }
+
+  #particles-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .beam-light {
+    position: absolute;
+    width: 380px;
+    height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--beam-glow) 0%, transparent 70%);
+    filter: blur(50px);
+    pointer-events: none;
+    z-index: 2;
+    will-change: transform;
+    animation: slowDrift 18s ease-in-out infinite alternate;
+  }
+
+  @keyframes slowDrift {
+    0% { transform: translate3d(-20%, 10%, 0) scale(1); }
+    50% { transform: translate3d(25%, 45%, 0) scale(1.2); }
+    100% { transform: translate3d(-10%, 80%, 0) scale(0.95); }
+  }
+
+  .app-content { position: relative; z-index: 10; }
+
+  .btn-action {
+    background-color: var(--btn-bg);
+    color: var(--btn-text);
+    border-radius: 9999px;
+    height: 48px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    transition: transform 0.12s ease;
+  }
+  .btn-action:active { transform: scale(0.98); }
+  .btn-action:disabled {
+    background-color: var(--btn-disabled);
+    color: var(--btn-disabled-text);
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .field-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    outline: none;
+    border-radius: 0;
+    transition: border-color 0.15s ease;
+  }
+  .field-input:focus { border-bottom-color: var(--text-primary); }
+
+  /* Плавный скролл для услуг и дат на смартфонах и ПК */
+  .scroll-touch-row {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    cursor: grab;
+    user-select: none;
+  }
+  .scroll-touch-row:active { cursor: grabbing; }
+
+  /* Фиксированная шторка бронирования */
+  .floating-bar {
+    position: fixed;
+    bottom: 64px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 440px;
+    background: var(--float-bar-bg);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-top: 1px solid var(--border-color);
+    padding: 10px 16px;
+    z-index: 35;
+  }
+
+  /* Нижняя навигация */
+  .bottom-dock {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 440px;
+    background: var(--float-bar-bg);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-top: 1px solid var(--border-color);
+    padding: 6px 16px calc(6px + env(safe-area-inset-bottom, 0px));
+    z-index: 40;
+  }
+
+  .select-box {
+    border: 1px solid var(--border-color);
+    background: var(--card-surface);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    color: var(--text-primary);
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .select-box:active { transform: scale(0.97); }
+  .select-box.is-selected {
+    background: var(--item-selected-bg) !important;
+    color: var(--item-selected-text) !important;
+    border-color: var(--item-selected-bg) !important;
+    box-shadow: 0 10px 28px -6px rgba(0, 0, 0, 0.45);
+  }
+  .select-box.is-selected * { color: var(--item-selected-text) !important; }
+  .select-box:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+  .fade-in { animation: fadeIn 0.15s ease-out forwards; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+
+<div class="app-shell" id="app">
+  <div class="beam-light"></div>
+  <canvas id="particles-canvas"></canvas>
+  <div class="app-content" id="app-content-root"></div>
+</div>
+
+<script>
+// Считываем слаг студии из адреса (например, ?slug=sanadetail)
+const urlParams = new URLSearchParams(window.location.search);
+const slug = urlParams.get('slug') || urlParams.get('name') || "apex";
+const storageKey = key => `${slug}_${key}`;
+
+// Базовые значения (показываются только если админка ещё ни разу не сохранялась)
+const DEFAULTS = {
+  name: urlParams.get('name') || "APEX Детейлинг",
+  category: urlParams.get('cat') || "Центр ухода & защиты кузова",
+  address: urlParams.get('addr') || "ул. Промышленная, 18, бокс 4",
+  phone: urlParams.get('phone') || "+7 (999) 000-00-00",
+  services: [
+    {
+      id: "srv_01",
+      code: "№ 01",
+      name: "Трехфазная детейлинг-мойка",
+      price: 2500,
+      duration: "1.5 ч",
+      desc: "Бережная очистка кузова пористой губкой, удаление битумных точек и пыли тормозных колодок, сушка турбовоздухом.",
+      photo: "https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&w=900&q=85"
+    },
+    {
+      id: "srv_02",
+      code: "№ 02",
+      name: "Мягкая восстановительная полировка",
+      price: 12000,
+      duration: "8 ч",
+      desc: "Устранение паутины, мелких царапин и матовости. Возвращение глубокого зеркального глянца и насыщенности цвета ЛКП.",
+      photo: "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=900&q=85"
+    },
+    {
+      id: "srv_03",
+      code: "№ 03",
+      name: "Комплексная химчистка салона",
+      price: 8500,
+      duration: "6 ч",
+      desc: "Глубокая экстракторная чистка ковролина и кресел с антибактериальной обработкой, деликатная консервация кожи и озонация.",
+      photo: "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=900&q=85"
+    }
+  ],
+  slots: [
+    { id: "s1", time: "10:00", label: "Пост 1" },
+    { id: "s2", time: "13:30", label: "Пост 1" },
+    { id: "s3", time: "16:00", label: "Пост 2" },
+    { id: "s4", time: "19:00", label: "Пост 2" }
+  ],
+  addons: [
+    { id: "opt_hydro", name: "Антидождь на полусферу", desc: "Стекла остаются сухими на скорости от 60 км/ч", price: 2000 },
+    { id: "opt_leather", name: "Консервация кожи спецсоставом", desc: "Защита от истирания, заломов и окрашивания одеждой", price: 2500 },
+    { id: "opt_engine", name: "Диэлектрическая мойка мотора", desc: "Безопасная очистка с консервацией электропроводки", price: 3000 }
+  ]
+};
+
+// ЕДИНЫЙ СЛОЙ ХРАНИЛИЩА (ЧИТАЕТ ПРЯМО ИЗ БАЗЫ АДМИНКИ)
+const DB = {
+  get settings() {
+    return JSON.parse(localStorage.getItem(storageKey("settings")) || JSON.stringify({
+      name: DEFAULTS.name,
+      category: DEFAULTS.category,
+      address: DEFAULTS.address,
+      phone: DEFAULTS.phone
+    }));
+  },
+  get services() {
+    return JSON.parse(localStorage.getItem(storageKey("services")) || JSON.stringify(DEFAULTS.services));
+  },
+  get slots() {
+    return JSON.parse(localStorage.getItem(storageKey("slots")) || JSON.stringify(DEFAULTS.slots));
+  },
+  get addons() {
+    return JSON.parse(localStorage.getItem(storageKey("addons")) || JSON.stringify(DEFAULTS.addons));
+  },
+  get bookings() {
+    return JSON.parse(localStorage.getItem(storageKey("bookings")) || "[]");
+  },
+  set bookings(v) { localStorage.setItem(storageKey("bookings"), JSON.stringify(v)); },
+  get blocked() {
+    return JSON.parse(localStorage.getItem(storageKey("blocked")) || "[]");
+  }
+};
+
+const $ = id => document.getElementById(id);
+const today = () => new Date().toISOString().slice(0, 10);
+const days = () => Array.from({length: 14}, (_, i) => {
+  let d = new Date();
+  d.setDate(d.getDate() + i);
+  return d.toISOString().slice(0, 10);
+});
+
+const money = n => new Intl.NumberFormat("ru-RU").format(Number(n) || 0) + " ₽";
+const esc = s => String(s ?? "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[m]));
+const uid = () => "CAR-" + Math.random().toString(36).slice(2, 7).toUpperCase();
+
+let S = {
+  theme: localStorage.getItem("theme") || "dark",
+  tab: "book",
+  service: null,
+  date: today(),
+  slot: null,
+  addons: [],
+  ticket: null,
+  pwaTab: "ios"
+};
+
+function ensureActiveService() {
+  const list = DB.services;
+  if (!S.service || !list.some(s => s.id === S.service)) {
+    S.service = list[0]?.id || null;
+  }
+}
+
+function applyTheme(th) {
+  S.theme = th;
+  localStorage.setItem("theme", th);
+  document.documentElement.setAttribute("data-theme", th);
+  const meta = $("meta-theme");
+  if (meta) meta.setAttribute("content", th === "dark" ? "#080a0d" : "#ffffff");
+  const thBtn = $("theme-toggle-btn");
+  if (thBtn) thBtn.innerText = th === "dark" ? "☀️" : "🌙";
+}
+
+function getService(id) {
+  const list = DB.services;
+  return list.find(s => s.id === id) || list[0] || DEFAULTS.services[0];
+}
+
+function isSlotBusy(d, sId) {
+  return DB.bookings.some(b => b.date === d && b.slot === sId && b.status !== "cancelled") || DB.blocked.includes(d + "_" + sId);
+}
+
+function calculateTotal() {
+  const srv = getService(S.service);
+  const base = srv ? Number(srv.price) : 0;
+  const currentAddons = DB.addons;
+  const adds = S.addons.reduce((sum, id) => {
+    const item = currentAddons.find(x => x.id === id);
+    return sum + (item ? Number(item.price) : 0);
+  }, 0);
+  return base + adds;
+}
+
+function render() {
+  ensureActiveService();
+  const root = $("app-content-root");
+  document.documentElement.setAttribute("data-theme", S.theme);
+
+  const conf = DB.settings;
+  document.getElementById("page-title").innerText = `${conf.name} — Запись онлайн`;
+
+  root.innerHTML = `
+    <!-- Аккуратная верхняя шапка -->
+    <header class="sticky top-0 z-30 px-5 py-3 border-b flex items-center justify-between" style="background:var(--float-bar-bg); border-color:var(--border-color); backdrop-filter:blur(24px);">
+      <div>
+        <div class="font-title text-sm font-extrabold uppercase tracking-tight" style="color:var(--text-primary)">${esc(conf.name)}</div>
+        <div class="text-[10px] font-medium" style="color:var(--text-secondary)">${esc(conf.category)}</div>
+      </div>
+
+      <button id="theme-toggle-btn" onclick="applyTheme(S.theme === 'dark' ? 'light' : 'dark')" class="text-xs font-bold px-2.5 py-1.5 rounded-lg border select-box">
+        ${S.theme === 'dark' ? '☀️' : '🌙'}
+      </button>
+    </header>
+
+    <main class="fade-in">
+      ${S.tab === "book" ? renderBookingLayout() : ""}
+      ${S.tab === "ticket" ? renderTicketView() : ""}
+      ${S.tab === "pwa" ? renderPwaGuideView() : ""}
+    </main>
+
+    ${S.tab === "book" ? `
+      <!-- Плавающая шторка бронирования -->
+      <div class="floating-bar">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <div class="text-[9px] font-bold uppercase tracking-wider" style="color:var(--text-secondary)">К оплате</div>
+            <div id="float-total" class="font-title text-lg font-extrabold" style="color:var(--text-primary)">${money(calculateTotal())}</div>
+          </div>
+          <button id="btn-submit-main" ${S.slot ? "" : "disabled"} onclick="openBookingModal()" class="btn-action flex-1">
+            ${S.slot ? 'Забронировать бокс' : 'Выберите время'}
+          </button>
+        </div>
+      </div>
+    ` : ""}
+
+    <!-- Нижняя мобильная навигация (Dock) -->
+    <nav class="bottom-dock">
+      <div class="flex items-center justify-between gap-2">
+        <button onclick="S.tab='book';render()" class="flex-1 py-1.5 rounded-xl text-center select-box ${S.tab==='book' ? 'is-selected' : ''}">
+          <span class="text-sm block">🚗</span>
+          <span class="text-[9px] font-bold block uppercase">Запись</span>
+        </button>
+
+        <button onclick="S.tab='ticket';render()" class="flex-1 py-1.5 rounded-xl text-center select-box ${S.tab==='ticket' ? 'is-selected' : ''}">
+          <span class="text-sm block">🎟️</span>
+          <span class="text-[9px] font-bold block uppercase">Талон</span>
+        </button>
+
+        <button onclick="S.tab='pwa';render()" class="flex-1 py-1.5 rounded-xl text-center select-box ${S.tab==='pwa' ? 'is-selected' : ''}">
+          <span class="text-sm block">📲</span>
+          <span class="text-[9px] font-bold block uppercase">В телефон</span>
+        </button>
+      </div>
+    </nav>
+
+    <div id="modal-container"></div>
+  `;
+
+  // Инициализация drag-скролла мышкой для ПК
+  if (S.tab === "book") {
+    requestAnimationFrame(() => {
+      enableDragScroll("services-scroll");
+      enableDragScroll("dates-scroll");
+    });
+  }
+}
+
+function renderBookingLayout() {
+  const currentSrv = getService(S.service);
+  const servicesList = DB.services;
+  const addonsList = DB.addons;
+
+  return `
+    <div class="space-y-6 pt-3">
+      <!-- 01 Главный баннер выбранной услуги -->
+      <div class="px-5">
+        <div class="relative w-full h-52 overflow-hidden rounded-2xl border" style="border-color:var(--border-color);">
+          <img id="hero-img" src="${currentSrv.photo}" class="w-full h-full object-cover grayscale contrast-125" alt="Превью">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
+          <div class="absolute bottom-3 left-4 right-4 flex justify-between items-end text-white">
+            <div>
+              <span id="hero-code" class="text-[10px] uppercase font-bold tracking-widest bg-white/20 px-2 py-0.5 rounded backdrop-blur">
+                ${currentSrv.code}
+              </span>
+              <h1 id="hero-title" class="font-title text-xl font-extrabold mt-1 tracking-tight">${esc(currentSrv.name)}</h1>
+            </div>
+            <span id="hero-price" class="font-title text-xl font-extrabold whitespace-nowrap">${money(currentSrv.price)}</span>
+          </div>
+        </div>
+        <p id="hero-desc" class="text-xs leading-relaxed mt-2.5" style="color:var(--text-secondary)">${esc(currentSrv.desc)}</p>
+      </div>
+
+      <!-- 02 Горизонтальный скролл услуг (прокрутка вправо работает свободно) -->
+      <div class="px-5">
+        <div class="flex justify-between items-center mb-2.5">
+          <div class="text-[11px] font-bold uppercase tracking-wider" style="color:var(--text-secondary)">1. Выберите комплекс (${servicesList.length})</div>
+          <span class="text-[10px] text-zinc-400">Свайп вправо →</span>
+        </div>
+        <div id="services-scroll" class="scroll-touch-row gap-2.5 pb-2 -mx-5 px-5">
+          ${servicesList.map(s => {
+            const active = s.id === S.service;
+            return `
+              <button id="srv-card-${s.id}" onclick="selectServiceFast('${s.id}')" 
+                class="select-box shrink-0 w-44 p-3.5 rounded-xl text-left ${active ? 'is-selected' : ''}">
+                <div class="text-[10px] font-bold uppercase mb-1" style="color:var(--text-secondary)">${s.code} ·${s.duration}</div>
+                <div class="font-title text-xs font-bold leading-snug truncate">${esc(s.name)}</div>
+                <div class="font-title text-sm font-extrabold mt-2">${money(s.price)}</div>
+              </button>
+            `;
+          }).join("")}
+        </div>
+      </div>
+
+      <!-- 03 Горизонтальный скролл дат заезда на 14 дней -->
+      <div class="px-5">
+        <div class="flex justify-between items-center mb-2.5">
+          <div class="text-[11px] font-bold uppercase tracking-wider" style="color:var(--text-secondary)">2. Дата заезда</div>
+          <span class="text-[10px] text-zinc-400">Свайп вправо →</span>
+        </div>
+        <div id="dates-scroll" class="scroll-touch-row gap-2 pb-2 -mx-5 px-5">
+          ${days().map(d => {
+            const isSel = d === S.date;
+            const dateObj = new Date(d + "T12:00");
+            const wday = dateObj.toLocaleDateString("ru-RU", { weekday: "short" }).toUpperCase();
+            const dayNum = dateObj.getDate();
+
+            return `
+              <button id="date-btn-${d}" onclick="selectDateFast('${d}')" 
+                class="select-box shrink-0 w-14 py-3 rounded-xl text-center ${isSel ? 'is-selected' : ''}">
+                <span class="text-[10px] font-bold block" style="color:var(--text-secondary)">${wday}</span>
+                <span class="font-title text-lg font-extrabold block my-0.5">${dayNum}</span>
+              </button>
+            `;
+          }).join("")}
+        </div>
+      </div>
+
+      <!-- 04 Боксы и посты (подтягиваются из конструктора админки) -->
+      <div class="px-5">
+        <div class="text-[11px] font-bold uppercase tracking-wider mb-2.5" style="color:var(--text-secondary)">3. Время и свободный бокс</div>
+        <div id="slots-grid" class="grid grid-cols-2 gap-2.5">
+          ${renderSlotsGridHTML()}
+        </div>
+      </div>
+
+      <!-- 05 Дополнительные опции (подтягиваются из админки) -->
+      <div class="px-5 pb-4">
+        <div class="text-[11px] font-bold uppercase tracking-wider mb-2.5" style="color:var(--text-secondary)">4. Дополнительные опции</div>
+        <div class="border rounded-2xl divide-y overflow-hidden select-box" style="border-color:var(--border-color); padding:0;">
+          ${addonsList.map(a => {
+            const active = S.addons.includes(a.id);
+            return `
+              <div onclick="toggleAddonFast('${a.id}')" class="p-3.5 flex items-center justify-between cursor-pointer select-none">
+                <div class="pr-3">
+                  <div class="font-title text-xs font-bold" style="color:var(--text-primary)">${esc(a.name)}</div>
+                  <div class="text-[11px] mt-0.5" style="color:var(--text-secondary)">${esc(a.desc)}</div>
+                </div>
+                <div class="flex items-center gap-3 shrink-0">
+                  <span class="font-title text-xs font-extrabold" style="color:var(--text-primary)">+${money(a.price)}</span>
+                  <span id="addon-check-${a.id}" class="w-5 h-5 rounded-md border flex items-center justify-center text-xs font-bold ${active ? 'is-selected' : 'select-box'}">
+                    ${active ? '✓' : ''}
+                  </span>
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSlotsGridHTML() {
+  const currentSlots = DB.slots;
+
+  return currentSlots.map(sl => {
+    const busy = isSlotBusy(S.date, sl.id);
+    const active = S.slot === sl.id;
+
+    return `
+      <button id="slot-btn-${sl.id}" ${busy ? "disabled" : ""} onclick="selectSlotFast('${sl.id}')" 
+        class="select-box p-3 rounded-xl text-left ${active ? 'is-selected' : ''}">
+        <div class="flex justify-between items-baseline mb-1">
+          <span class="font-title text-base font-extrabold">${sl.time}</span>
+          <span class="text-[10px] font-bold uppercase" style="color:var(--text-secondary)">
+            ${busy ? 'Занят' : 'Свободен'}
+          </span>
+        </div>
+        <div class="text-[10px] font-semibold" style="color:var(--text-secondary)">${esc(sl.label)}</div>
+      </button>
+    `;
+  }).join("");
+}
+
+function selectServiceFast(id) {
+  if (S.service === id) return;
+  const oldCard = $("srv-card-" + S.service);
+  if (oldCard) oldCard.classList.remove("is-selected");
+
+  S.service = id;
+  const newCard = $("srv-card-" + id);
+  if (newCard) newCard.classList.add("is-selected");
+
+  const srv = getService(id);
+  const heroImg = $("hero-img");
+  const heroTitle = $("hero-title");
+  const heroPrice = $("hero-price");
+  const heroDesc = $("hero-desc");
+  const heroCode = $("hero-code");
+
+  if (heroImg) heroImg.src = srv.photo;
+  if (heroTitle) heroTitle.innerText = srv.name;
+  if (heroPrice) heroPrice.innerText = money(srv.price);
+  if (heroDesc) heroDesc.innerText = srv.desc;
+  if (heroCode) heroCode.innerText = srv.code;
+
+  updateTotalFast();
+}
+
+function selectDateFast(d) {
+  if (S.date === d) return;
+  const oldBtn = $("date-btn-" + S.date);
+  if (oldBtn) oldBtn.classList.remove("is-selected");
+
+  S.date = d;
+  S.slot = null;
+
+  const newBtn = $("date-btn-" + d);
+  if (newBtn) newBtn.classList.add("is-selected");
+
+  const grid = $("slots-grid");
+  if (grid) grid.innerHTML = renderSlotsGridHTML();
+  updateTotalFast();
+}
+
+function selectSlotFast(sId) {
+  if (S.slot === sId) return;
+  if (S.slot) {
+    const oldSlot = $("slot-btn-" + S.slot);
+    if (oldSlot) oldSlot.classList.remove("is-selected");
+  }
+
+  S.slot = sId;
+  const newSlot = $("slot-btn-" + sId);
+  if (newSlot) newSlot.classList.add("is-selected");
+
+  updateTotalFast();
+}
+
+function toggleAddonFast(id) {
+  const idx = S.addons.indexOf(id);
+  const check = $("addon-check-" + id);
+
+  if (idx >= 0) {
+    S.addons.splice(idx, 1);
+    if (check) {
+      check.classList.remove("is-selected");
+      check.innerText = "";
+    }
+  } else {
+    S.addons.push(id);
+    if (check) {
+      check.classList.add("is-selected");
+      check.innerText = "✓";
+    }
+  }
+
+  updateTotalFast();
+}
+
+function updateTotalFast() {
+  const total = calculateTotal();
+  const totalEl = $("float-total");
+  if (totalEl) totalEl.innerText = money(total);
+
+  const mainBtn = $("btn-submit-main");
+  if (mainBtn) {
+    if (S.slot) {
+      mainBtn.removeAttribute("disabled");
+      mainBtn.innerText = "Забронировать бокс";
+    } else {
+      mainBtn.setAttribute("disabled", "true");
+      mainBtn.innerText = "Выберите время";
+    }
+  }
+}
+
+// === ПОДДЕРЖКА ПЕРЕТАСКИВАНИЯ СКРОЛЛА МЫШКОЙ НА ПК ===
+function enableDragScroll(id) {
+  const el = $(id);
+  if (!el || el.dataset.dragReady === "1") return;
+  el.dataset.dragReady = "1";
+
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+
+  el.addEventListener('mousedown', (e) => {
+    isDown = true;
+    startX = e.pageX - el.offsetLeft;
+    scrollLeft = el.scrollLeft;
+  });
+  el.addEventListener('mouseleave', () => { isDown = false; });
+  el.addEventListener('mouseup', () => { isDown = false; });
+  el.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    el.scrollLeft = scrollLeft - walk;
+  });
+}
+
+function renderPwaGuideView() {
+  const guides = {
+    ios: [
+      { step: "01", title: "Кнопка «Поделиться»", desc: "Нажмите на значок квадрата со стрелкой вверх в нижней панели браузера Safari." },
+      { step: "02", title: "На экран «Домой»", desc: "Пролистайте список действий вниз и выберите строку «На экран «Домой»." },
+      { step: "03", title: "Подтверждение", desc: "Нажмите «Добавить» в правом верхнем углу. Иконка появится на рабочем столе телефона." }
+    ],
+    android: [
+      { step: "01", title: "Меню браузера", desc: "Нажмите на три точки в правом верхнем углу браузера Chrome." },
+      { step: "02", title: "Установка", desc: "Выберите пункт «Установить приложение» или «Добавить на главный экран»." },
+      { step: "03", title: "Готово", desc: "Подтвердите действие. Приложение откроется на весь экран без адресной строки." }
+    ]
+  };
+
+  return `
+    <div class="p-5 space-y-6">
+      <div class="border rounded-2xl p-5 select-box">
+        <div class="text-[10px] font-bold uppercase tracking-wider mb-1" style="color:var(--text-secondary)">PWA Мини-приложение</div>
+        <h1 class="font-title text-xl font-extrabold tracking-tight" style="color:var(--text-primary)">Установите сервис на рабочий стол</h1>
+        <p class="text-xs leading-relaxed mt-2" style="color:var(--text-secondary)">
+          Работает без скачивания из App Store. Моментальная проверка статуса записи прямо с экрана смартфона.
+        </p>
+      </div>
+
+      <div>
+        <div class="flex rounded-xl p-1 border mb-4 select-box">
+          ${["ios", "android"].map(p => `
+            <button onclick="S.pwaTab='${p}';render()" class="flex-1 py-2 rounded-lg text-xs font-bold transition-all ${S.pwaTab === p ? 'is-selected' : 'text-zinc-500'}">
+              ${p === 'ios' ? 'iPhone' : 'Android'}
+            </button>
+          `).join("")}
+        </div>
+
+        <div class="space-y-3">
+          ${guides[S.pwaTab].map(g => `
+            <div class="p-4 rounded-xl border flex gap-3.5 items-start select-box">
+              <span class="font-title font-extrabold text-xs px-2 py-1 rounded border is-selected">${g.step}</span>
+              <div>
+                <div class="font-title text-xs font-bold" style="color:var(--text-primary)">${g.title}</div>
+                <div class="text-xs mt-1 leading-relaxed" style="color:var(--text-secondary)">${g.desc}</div>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+
+      <button onclick="S.tab='book';render()" class="btn-action w-full">
+        ← Вернуться к записи
+      </button>
+    </div>
+  `;
+}
+
+function renderTicketView() {
+  const b = JSON.parse(localStorage.getItem(storageKey("myBooking")) || "null");
+  const conf = DB.settings;
+
+  if (!b) {
+    return `
+      <div class="px-5 py-24 text-center">
+        <div class="text-3xl mb-3">🚗</div>
+        <h2 class="font-title text-lg font-bold uppercase" style="color:var(--text-primary)">Нет активных броней</h2>
+        <p class="text-xs mt-1 mb-6 max-w-xs mx-auto" style="color:var(--text-secondary)">Забронируйте удобный слот, чтобы зафиксировать бокс</p>
+        <button onclick="S.tab='book';render()" class="btn-action px-8">Записаться на мойку</button>
+      </div>
+    `;
+  }
+
+  const srv = getService(b.service);
+  const slotsList = DB.slots;
+  const slotObj = slotsList.find(x => x.id === b.slot);
+
+  return `
+    <div class="p-5 space-y-5">
+      <div class="flex justify-between items-baseline border-b pb-3" style="border-color:var(--border-color);">
+        <h1 class="font-title text-lg font-extrabold uppercase" style="color:var(--text-primary)">Талон на обслуживание</h1>
+        <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded border is-selected">Активен</span>
+      </div>
+
+      <div class="border rounded-2xl p-5 space-y-4 select-box">
+        <div>
+          <div class="text-[10px] font-bold uppercase tracking-wider" style="color:var(--text-secondary)">Номер заезда</div>
+          <div class="font-title text-2xl font-black mt-0.5" style="color:var(--text-primary)">${b.code}</div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 text-xs pt-3 border-t" style="border-color:var(--border-color);">
+          <div>
+            <span class="text-[10px] font-bold uppercase block" style="color:var(--text-secondary)">Автомобиль</span>
+            <span class="font-title font-extrabold uppercase block" style="color:var(--text-primary)">${esc(b.car)}</span>
+            <span class="text-[11px] font-medium" style="color:var(--text-secondary)">${esc(b.plate || 'Без номера')}</span>
+          </div>
+          <div>
+            <span class="text-[10px] font-bold uppercase block" style="color:var(--text-secondary)">Дата и время</span>
+            <span class="font-title font-bold block" style="color:var(--text-primary)">${b.date}</span>
+            <span class="text-[11px] font-medium" style="color:var(--text-secondary)">${slotObj?.time || b.slot} (${slotObj?.label || ''})</span>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t flex justify-between items-baseline" style="border-color:var(--border-color);">
+          <span class="text-[10px] font-bold uppercase" style="color:var(--text-secondary)">К оплате:</span>
+          <span class="font-title text-xl font-extrabold" style="color:var(--text-primary)">${money(b.sum)}</span>
+        </div>
+      </div>
+
+      <div class="text-xs text-center leading-relaxed" style="color:var(--text-secondary)">
+        📍 Адрес: ${esc(conf.address)}<br>Ждем вас за 5–10 минут до назначенного времени.
+      </div>
+
+      <button onclick="S.tab='book';render()" class="btn-action w-full">
+        ← Вернуться к услугам
+      </button>
+    </div>
+  `;
+}
+
+function openBookingModal() {
+  const slotsList = DB.slots;
+  const slotObj = slotsList.find(x => x.id === S.slot);
+  const cont = $("modal-container");
+
+  cont.innerHTML = `
+    <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end justify-center">
+      <div class="w-full max-w-[440px] p-6 rounded-t-3xl border-t fade-in" style="background:var(--bg-app); border-color:var(--border-color);">
+        <div class="flex justify-between items-baseline mb-4 pb-3 border-b" style="border-color:var(--border-color);">
+          <div>
+            <div class="text-[10px] font-bold uppercase tracking-wider" style="color:var(--text-secondary)">Подтверждение записи</div>
+            <h3 class="font-title text-base font-extrabold" style="color:var(--text-primary)">${fmt(S.date)} · ${slotObj?.time} (${slotObj?.label})</h3>
+          </div>
+          <button onclick="closeModal()" class="text-lg font-bold" style="color:var(--text-secondary)">✕</button>
+        </div>
+
+        <form onsubmit="handleBookingSubmit(event)" class="space-y-4">
+          <div>
+            <label class="text-[10px] font-bold uppercase tracking-wider block mb-1" style="color:var(--text-secondary)">Марка и модель авто</label>
+            <input id="guest_car" required placeholder="BMW M5 / Geely Monjaro" class="field-input uppercase">
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-[10px] font-bold uppercase tracking-wider block mb-1" style="color:var(--text-secondary)">Госномер</label>
+              <input id="guest_plate" placeholder="A 777 AA 77" class="field-input uppercase">
+            </div>
+            <div>
+              <label class="text-[10px] font-bold uppercase tracking-wider block mb-1" style="color:var(--text-secondary)">Ваше имя</label>
+              <input id="guest_name" required placeholder="Александр" class="field-input">
+            </div>
+          </div>
+
+          <div>
+            <label class="text-[10px] font-bold uppercase tracking-wider block mb-1" style="color:var(--text-secondary)">Номер телефона</label>
+            <input id="guest_phone" required type="tel" placeholder="+7 (999) 000-00-00" class="field-input">
+          </div>
+
+          <div class="pt-3 border-t flex justify-between items-baseline" style="border-color:var(--border-color);">
+            <span class="text-xs font-bold" style="color:var(--text-secondary)">Итоговая сумма:</span>
+            <span class="font-title text-lg font-extrabold" style="color:var(--text-primary)">${money(calculateTotal())}</span>
+          </div>
+
+          <button type="submit" class="btn-action w-full mt-2">
+            Забронировать бокс
+          </button>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+function closeModal() {
+  const cont = $("modal-container");
+  if (cont) cont.innerHTML = "";
+}
+
+function handleBookingSubmit(e) {
+  e.preventDefault();
+
+  if (isSlotBusy(S.date, S.slot)) {
+    alert("Этот бокс уже занят! Выберите другое свободное время.");
+    closeModal();
+    return;
+  }
+
+  const newBooking = {
+    id: uid(),
+    code: uid(),
+    car: $("guest_car").value.trim(),
+    plate: $("guest_plate").value.trim(),
+    name: $("guest_name").value.trim(),
+    phone: $("guest_phone").value.trim(),
+    service: S.service,
+    date: S.date,
+    slot: S.slot,
+    addons: [...S.addons],
+    sum: calculateTotal(),
+    status: "new",
+    created: Date.now()
+  };
+
+  const list = DB.bookings;
+  list.unshift(newBooking);
+  DB.bookings = list;
+  localStorage.setItem(storageKey("myBooking"), JSON.stringify(newBooking));
+
+  closeModal();
+  showSuccessModal(newBooking);
+}
+
+function showSuccessModal(b) {
+  const conf = DB.settings;
+  const cleanPhone = conf.phone.replace(/[^0-9]/g, "");
+  const waMsg = encodeURIComponent(`Здравствуйте! Записался на детейлинг в ${conf.name}.\nКод брони: ${b.code}\nАвто: ${b.car} [${b.plate || '-'}]\nДата: ${b.date} @ ${b.slot}\nСумма: ${b.sum} руб.`);
+  const waLink = `https://wa.me/${cleanPhone}?text=${waMsg}`;
+
+  const cont = $("modal-container");
+  cont.innerHTML = `
+    <div class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-5 fade-in">
+      <div class="w-full max-w-sm rounded-3xl p-6 text-center border" style="background:var(--bg-app); border-color:var(--border-color);">
+        <div class="w-14 h-14 rounded-full flex items-center justify-center text-2xl mx-auto mb-3 is-selected">✓</div>
+        <h2 class="font-title text-xl font-extrabold" style="color:var(--text-primary)">Бокс забронирован!</h2>
+        <p class="text-xs mt-1" style="color:var(--text-secondary)">Ждем ваш авто в назначенное время.</p>
+
+        <div class="my-5 p-4 rounded-xl border select-box">
+          <div class="text-[10px] font-bold uppercase" style="color:var(--text-secondary)">Код вашего талона</div>
+          <div class="font-title text-3xl font-black mt-1" style="color:var(--text-primary)">${b.code}</div>
+        </div>
+
+        <div class="space-y-2.5">
+          <a href="${waLink}" target="_blank" class="btn-action w-full text-xs">
+            💬 Отправить талон в WhatsApp
+          </a>
+          <button onclick="closeModal();S.tab='ticket';render()" class="btn-action w-full text-xs select-box">
+            Открыть талон в приложении
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function fmt(d) {
+  return new Date(d + "T12:00").toLocaleDateString("ru-RU", { day: "numeric", month: "short" });
+}
+
+function initCanvasParticles() {
+  const canvas = $("particles-canvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  let w = canvas.width = canvas.offsetWidth;
+  let h = canvas.height = canvas.offsetHeight;
+
+  window.addEventListener("resize", () => {
+    if (!canvas) return;
+    w = canvas.width = canvas.offsetWidth;
+    h = canvas.height = canvas.offsetHeight;
+  });
+
+  const count = 35;
+  const particles = Array.from({ length: count }, () => ({
+    x: Math.random() * w,
+    y: Math.random() * h,
+    vx: (Math.random() - 0.5) * 0.35,
+    vy: (Math.random() - 0.5) * 0.45,
+    size: Math.random() * 2.2 + 0.8,
+    alpha: Math.random() * 0.5 + 0.2
+  }));
+
+  function loop() {
+    ctx.clearRect(0, 0, w, h);
+    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+
+    for (let i = 0; i < count; i++) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.x < 0) p.x = w;
+      if (p.x > w) p.x = 0;
+      if (p.y < 0) p.y = h;
+      if (p.y > h) p.y = 0;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = isDark 
+        ? `rgba(255, 255, 255, ${p.alpha * 0.35})` 
+        : `rgba(15, 23, 42, ${p.alpha * 0.25})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+// При любых изменениях в админке клиент моментально перерисовывается
+window.addEventListener("storage", render);
+render();
+initCanvasParticles();
+</script>
+</body>
+</html>
