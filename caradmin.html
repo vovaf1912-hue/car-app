@@ -4,7 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#080a0d" id="meta-theme">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CRM Детейлинг">
 <title id="admin-title">CRM Панель управления</title>
+
+<!-- PWA Manifest для автономной работы -->
+<link rel="manifest" href='data:application/manifest+json,{"name":"CRM Панель","short_name":"CRM","start_url":".","display":"standalone","background_color":"#080a0d","theme_color":"#080a0d"}'>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -568,7 +574,7 @@ function renderServicesTab() {
             <div class="flex gap-3">
               <img src="${s.photo}" class="w-20 h-20 object-cover rounded-xl border" style="border-color:var(--border-color);" alt="Превью">
               <div class="flex-1 min-w-0">
-                <span class="text-[10px] font-bold uppercase text-orange-400">${s.code} · ${s.duration}</span>
+                <span class="text-[10px] font-bold uppercase text-orange-400">${s.code} ·${s.duration}</span>
                 <h3 class="font-title text-sm font-extrabold truncate">${esc(s.name)}</h3>
                 <div class="font-title text-base font-black mt-1">${money(s.price)}</div>
               </div>
@@ -578,7 +584,7 @@ function renderServicesTab() {
 
             <div class="flex items-center gap-2 pt-1 border-t" style="border-color:var(--border-color);">
               <button onclick="openServiceModal('${s.id}')" class="flex-1 py-1.5 rounded-xl border select-box text-xs font-bold">
-                ✏️️ Редактировать
+                ✏ Редактировать
               </button>
               <button onclick="deleteService('${s.id}')" class="p-1.5 rounded-xl border select-box text-xs text-red-400">
                 🗑️
@@ -982,6 +988,19 @@ function saveSettingsForm(e) {
 function closeModal() {
   const m = $("modal-root");
   if (m) m.innerHTML = "";
+}
+
+// === РЕГИСТРАЦИЯ SERVICE WORKER ДЛЯ АДМИНКИ ===
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then((reg) => {
+        console.log('CRM Service Worker зарегистрирован:', reg.scope);
+      })
+      .catch((err) => {
+        console.warn('Ошибка регистрации SW в админке:', err);
+      });
+  });
 }
 
 window.addEventListener("storage", render);
