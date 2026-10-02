@@ -4,13 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#080a0d" id="meta-theme">
+
+<!-- Мета-теги для PWA и нативного режима iOS/Android -->
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CRM Детейлинг">
-<title id="admin-title">CRM Панель управления</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%23080a0d'/><text x='50%25' y='60%25' dominant-baseline='middle' text-anchor='middle' font-size='100'>⚙️</text></svg>">
+<link rel="manifest" href="./manifest.json">
 
-<!-- PWA Manifest для автономной работы -->
-<link rel="manifest" href='data:application/manifest+json,{"name":"CRM Панель","short_name":"CRM","start_url":".","display":"standalone","background_color":"#080a0d","theme_color":"#080a0d"}'>
+<title id="admin-title">CRM Панель управления</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -173,7 +176,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const slug = urlParams.get('slug') || urlParams.get('name') || "apex";
 const storageKey = key => `${slug}_${key}`;
 
-// Чтение комплексов и прямых ссылок на фото из URL-параметров
+// Чтение комплексов и ссылок на фото из URL-параметров генератора
 function getInitialServicesFromUrl() {
   const list = [];
   for (let i = 1; i <= 6; i++) {
@@ -241,7 +244,7 @@ const DEFAULTS = {
   ]
 };
 
-// Единый слой доступа: если в URL переданы новые параметры из create.html, они сразу подтягиваются
+// Единый слой доступа: параметры из URL немедленно обновляют базу данных слага
 const DB = {
   get settings() {
     const raw = localStorage.getItem(storageKey("settings"));
@@ -407,6 +410,9 @@ function renderDashboardView(root) {
         <a href="${clientHref}" target="_blank" class="text-[11px] font-bold px-2.5 py-1.5 rounded-lg border select-box">
           Витрина ↗
         </a>
+        <button onclick="triggerAdminPwaInstall()" title="Установить CRM на рабочий стол" class="text-[11px] font-bold px-2 py-1.5 rounded-lg border select-box">
+          📲
+        </button>
         <button onclick="applyTheme(S.theme === 'dark' ? 'light' : 'dark')" class="text-[11px] font-bold px-2 py-1.5 rounded-lg border select-box">
           ${S.theme === 'dark' ? '☀️' : '🌙'}
         </button>
@@ -629,7 +635,7 @@ function renderServicesTab() {
                 ✏ Редактировать
               </button>
               <button onclick="deleteService('${s.id}')" class="p-1.5 rounded-xl border select-box text-xs text-red-400">
-                🗑️
+                🗑️️
               </button>
             </div>
           </div>
@@ -1030,6 +1036,24 @@ function saveSettingsForm(e) {
 function closeModal() {
   const m = $("modal-root");
   if (m) m.innerHTML = "";
+}
+
+// === УПРАВЛЕНИЕ PWA УСТАНОВКОЙ АДМИНКИ ===
+let adminDeferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  adminDeferredPrompt = e;
+});
+
+function triggerAdminPwaInstall() {
+  if (adminDeferredPrompt) {
+    adminDeferredPrompt.prompt();
+    adminDeferredPrompt.userChoice.then(() => {
+      adminDeferredPrompt = null;
+    });
+  } else {
+    alert("Нажмите кнопку 'Поделиться' в Safari (или 3 точки в Chrome) и выберите 'На экран Домой', чтобы установить CRM как приложение.");
+  }
 }
 
 // === РЕГИСТРАЦИЯ SERVICE WORKER ДЛЯ АДМИНКИ ===
